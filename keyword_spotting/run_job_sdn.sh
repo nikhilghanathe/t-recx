@@ -1,4 +1,4 @@
--#!/bin/sh
+#!/bin/sh
 #SBATCH --job-name tinyml-kws_model_sdn
 #SBATCH --time 30:00:00
 #SBATCH --output=output_model_sdn.txt
