@@ -6,5 +6,5 @@ nvidia-smi -q | grep -E '(Name|UUID)'
 eval "$(conda shell.bash hook)"
 conda activate tiny
 
-python train_dscnn.py --data=data/ --model_architecture=ds_cnn_eefmaps_concat --isTrecx --model_save_name=model_eefmaps_concat
+python train_dscnn.py --data_dir=data/ --model_architecture=ds_cnn_eefmaps_concat --isTrecx --model_save_name=model_eefmaps_concat
 
