@@ -1,0 +1,9 @@
+cifar-10-python.tar.gz
+cifar-10-batches-py/
+.idea
+__pycache__/
+data/
+*.txt
+*.jpg
+*.png
+*.npy

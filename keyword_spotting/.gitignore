@@ -1,0 +1,13 @@
+*~
+data/
+plots/
+trace_data-old/
+*.dat
+tmp*
+*.txt
+tmp/
+__pycache__/
+.DS_Store
+Untitled*
+aww_model.tflite
+.ipynb_checkpoints/

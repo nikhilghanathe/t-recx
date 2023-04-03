@@ -1,0 +1,13 @@
+vw_coco2014_96.tar.gz
+.idea
+__pycache__/
+vw_coco2014_96/
+val2017/
+annotations/
+*.txt
+*.out
+*.jpg
+*.png
+*.npy
+trained_models_old/
+trace_data_old/
