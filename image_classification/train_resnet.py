@@ -264,7 +264,7 @@ if __name__ == "__main__":
 
 
     args = parser.parse_args()
-    model_name = args.model_save_name
+    model_save_name = args.model_save_name
     W_aux = float(args.W_aux)
     isEV = args.isEV
     isTrecx = args.isTrecx
