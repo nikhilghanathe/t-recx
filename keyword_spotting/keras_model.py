@@ -33,7 +33,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
         
         y_true, y_true_transformed = [], []
         if self.batch_size==None:
-            self.batch_size=32
+            self.batch_size=100
         #compute the one hot 'y_true' vector for loss computation
         for i in range(0, self.batch_size):
             arg_max_true = tf.keras.backend.argmax(targets[i])

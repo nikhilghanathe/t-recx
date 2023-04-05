@@ -2,7 +2,7 @@
 
 import matplotlib.pyplot as plt
 import numpy as np
-import os
+import os, sys
 import argparse
 from tensorflow import keras
 import tensorflow as tf
@@ -52,6 +52,10 @@ if __name__ == '__main__':
   ds_train, ds_test, ds_val = kws_data.get_training_data(Flags)
   print("Done getting data")
 
+
+  #append ffmpeg path to system path
+  pwd = os.getcwd()
+  sys.path.append(pwd+'/ffmpeg-5.0-amd64-static/')
 
   # this is taken from the dataset web page.
   # there should be a better way than hard-coding this
