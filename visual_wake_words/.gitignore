@@ -12,5 +12,4 @@ annotations/
 *.jpg
 *.png
 *.npy
-trained_models_old/
-trace_data_old/
+trace_data/

@@ -1,7 +1,6 @@
 *~
 data/
 plots/
-trace_data-old/
 *.dat
 tmp*
 *.txt

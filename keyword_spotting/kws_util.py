@@ -265,7 +265,7 @@ def save_trecx_model(model, model_save_name, model_arch):
         if layer.name=='ee_2':
             ee2_layer_num = cnt
         if layer.name=='ee_3':
-            ee2_layer_num = cnt
+            ee3_layer_num = cnt
         if layer.name=='ef_out':
             ef_layer_num = cnt
         cnt+=1
