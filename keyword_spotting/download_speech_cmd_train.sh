@@ -1,4 +1,5 @@
 #!/bin/bash
+conda install -c forge ffmpeg
 export TF_CPP_MIN_LOG_LEVEL=2 
 # train all models for testing
 #model with EV-assistance
