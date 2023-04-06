@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 import tensorflow as tf
-import keras
+import tensorflow.keras as keras
 import train_resnet as train
 import keras_model
 import sys, copy, json

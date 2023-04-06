@@ -7,5 +7,5 @@ nvidia-smi -q | grep -E '(Name|UUID)'
 eval "$(conda shell.bash hook)"
 conda activate trecx
 
-python test_dscnn.py
+python test_dscnn.py --data_dir=data/
 
