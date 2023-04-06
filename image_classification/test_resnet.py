@@ -130,7 +130,7 @@ def plot_violin_plot(model_name_ev, model_name_baseline):
 # ----------------------------------------------------------------------------------------
 # Plot the benefit curve of resnet with trecx, branchynet and SDN techniques
 def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchynet, total_samples):
-    # x_axis_accuracy_ev, y_axis_flops_ev = helpers.calculate_scatter_points(model_name_ev, total_samples)
+    x_axis_accuracy_ev, y_axis_flops_ev = helpers.calculate_scatter_points(model_name_ev, total_samples)
     x_axis_accuracy_sdn, y_axis_flops_sdn = helpers.calculate_scatter_points_prior(model_name_sdn, total_samples)
     x_axis_accuracy_branchynet, y_axis_flops_branchynet = helpers.calculate_scatter_points_prior(model_name_branchynet, total_samples)
 
@@ -138,7 +138,7 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     plt.scatter(Config.accuracy_noEE, Config.flops_noEE, label='no EE', color = 'red')
     plt.vlines(Config.accuracy_noEE, 0,Config.flops_noEE, linestyles='dashed', color='orange')
     plt.hlines(Config.flops_noEE, 0,Config.accuracy_noEE, linestyles='dashed', color='orange')
-    # plt.scatter(x_axis_accuracy_ev, y_axis_flops_ev, color='blue', label='T-RECX')
+    plt.scatter(x_axis_accuracy_ev, y_axis_flops_ev, color='blue', label='T-RECX')
     plt.scatter(x_axis_accuracy_sdn, y_axis_flops_sdn, color='yellow', label='SDN')
     plt.scatter(x_axis_accuracy_branchynet, y_axis_flops_branchynet, color='green', label='BRANCHYNET')
     plt.title('Flops vs Accuracy tradeoff (Comparison with Prior works) Fig7a')
@@ -168,6 +168,47 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
 
 
 
+def evaluate_models(test_data, test_labels):
+    print('========================================================')
+    print('Evaluating T-Recx model with EV-assistance...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_ev)
+    test_metrics = model.evaluate(test_data, test_labels)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
+    print('Evaluating T-Recx model without EV-assistance...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_noev)
+    test_metrics = model.evaluate(test_data, test_labels)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
+    print('Evaluating base model with baselineEE...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_baseline_ee)
+    test_metrics = model.evaluate(test_data, test_labels)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
+    print('Evaluating SDN-Resnet...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_sdn)
+    test_metrics = model.evaluate(test_data, test_labels)
+    print('Standalone accuracies are ', test_metrics[-3], test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+    
+    print('========================================================')
+    print('Evaluating Branchynet-Resnet...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_branchynet)
+    test_metrics = model.evaluate(test_data, test_labels)
+    print('Standalone accuracies are ', test_metrics[-3], test_metrics[-2], test_metrics[-1])
+    print('DONE!\n\n\n')
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -180,24 +221,26 @@ if __name__ == "__main__":
         train.load_cifar_data(cifar_10_dir)
 
     
+    #evaluate models
+    # evaluate_models(test_data, test_labels)
+    
 
-
-    # =========Generate Fig 4a=============================
-    # generate trace_data for EV-assist and noEV-assist models
-    print('=====================================')
-    print('Generating trace data. This may take several minutes (20-30min) to complete...')
-    print('=====================================')
-    helpers.generate_trace(test_data, test_labels, Config.model_name_ev)
-    helpers.generate_trace(test_data, test_labels, Config.model_name_noev)
-    helpers.generate_trace(test_data, test_labels, Config.model_baseline_ee)
-    print('DONE!')
-    #plot the benefit curve
-    print('=====================================')
-    print('Plotting benefit curve...The image will be saved in results/Fig4a.png')
-    print('=====================================')
-    plot_benefit_curve(Config.model_name_ev, Config.model_name_noev, total_samples=int(test_labels.shape[0]))
-    print('DONE!\n\n')
-    # ====================================================
+    # # =========Generate Fig 4a=============================
+    # # generate trace_data for EV-assist and noEV-assist models
+    # print('=====================================')
+    # print('Generating trace data. This may take several minutes (20-30min) to complete...')
+    # print('=====================================')
+    # helpers.generate_trace(test_data, test_labels, Config.model_name_ev)
+    # helpers.generate_trace(test_data, test_labels, Config.model_name_noev)
+    # helpers.generate_trace(test_data, test_labels, Config.model_baseline_ee)
+    # print('DONE!')
+    # #plot the benefit curve
+    # print('=====================================')
+    # print('Plotting benefit curve...The image will be saved in results/Fig4a.png')
+    # print('=====================================')
+    # plot_benefit_curve(Config.model_name_ev, Config.model_name_noev, total_samples=int(test_labels.shape[0]))
+    # print('DONE!\n\n')
+    # # ====================================================
 
 
 

@@ -28,7 +28,7 @@ def calc_accuracy(model_name, rho, total_samples):
 		truth = int(pred['truth'])
 		arg_max_1 = int(pred['arg_max_1'])
 		isCorrect = truth==arg_max_1
-		score_max_1, score_max_2 = float(pred['score_max_1']), float(pred['score_max_2'])
+		score_max_1 = float(pred['score_max_1'])
 		if score_max_1>rho:#if score > rho then early-exit
 			if isCorrect:
 				EE_1_correct +=1
@@ -49,7 +49,7 @@ def get_flops_ee_ef(model_name):
 	flops = []
 	for i in range(0, len(exit_list)):
 		new_model = get_ee_model(model, exit_list[:i+1])
-		flops.append(get_flops(new_model, batch_size=1))
+		flops.append(get_flops(new_model))
 	return flops[0], flops[1]
 
 
@@ -92,8 +92,8 @@ def generate_trace(val_generator, model_name):
 	  #collect trace for each pred in batch
 	  for i in range(0, BS):
 	  	truth = test_label.numpy()[i]
-	  	arg_max_1_ee1, arg_max_1_eefinal  = np.argmax(prediction_ee1), np.argmax(prediction_eefinal)
-	  	score_max_1_ee1, score_max_1_eefinal = max(prediction_ee1), max(prediction_eefinal)
+	  	arg_max_1_ee1, arg_max_1_eefinal  = np.argmax(prediction_ee1[i]), np.argmax(prediction_eefinal[i])
+	  	score_max_1_ee1, score_max_1_eefinal = max(prediction_ee1[i]), max(prediction_eefinal[i])
 
 	  	isCorrect = int(truth) == int(arg_max_1_ee1)
 	  	prediction_dict_ee1.update({str(count): {'prediction':str(arg_max_1_ee1), 'truth':str(truth), 'isCorrect': str(isCorrect), 
@@ -103,8 +103,9 @@ def generate_trace(val_generator, model_name):
 			  'score_max_1' : str(score_max_1_eefinal), 'arg_max_1' : str(arg_max_1_eefinal) }})
 
 	  	count+=1
-	    
 
+	if not os.path.exists('trace_data/'):
+		os.makedirs('trace_data')
 	#dump trace data
 	with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee.json', 'w') as fp:
 	 json.dump(prediction_dict_ee1, fp, indent=4)
@@ -135,25 +136,24 @@ def get_flops_prior(model_name, model_arch):
 		exit_list = ['ee_1', 'ee_2', 'ef_out']
 		for i in range(0, len(exit_list)):
 			new_model = get_ee_model(model, exit_list[:i+1])
-			flops.append(get_flops(new_model, batch_size=1))
+			flops.append(get_flops(new_model))
 		return flops[0], flops[1], flops[2]
 	else:
 		exit_list = ['ee_1', 'ee_2', 'ee_3', 'ef_out']
 		for i in range(0, len(exit_list)):
 			new_model = get_ee_model(model, exit_list[:i+1])
-			flops.append(get_flops(new_model, batch_size=1))
+			flops.append(get_flops(new_model))
 		return flops[0], flops[1], flops[2], flops[3]
 
 
 
 
 # =========collect trace data =================================
-def generate_trace_prior(test_data, test_labels, model_name, model_arch):
+def generate_trace_prior(val_generator, model_name, model_arch):
 	if os.path.exists('trace_data/'+'trace_data_'+model_name[15:]+'_ee1.json'):
 		print('Trace data already exists for ', model_name)
 		return
 	model = tf.keras.models.load_model(model_name)
-	label_classes = np.argmax(test_labels,axis=1)
 	#generate predictions and dump into json file
 	count = 0
 	if model_arch=='branchynet':
@@ -166,8 +166,8 @@ def generate_trace_prior(test_data, test_labels, model_name, model_arch):
 		  #collect trace for each pred in batch
 		  for i in range(0, BS):
 		  	truth = test_label.numpy()[i]
-		  	arg_max_1_ee1, arg_max_1_ee2, arg_max_1_eefinal  = np.argmax(prediction_ee1), np.argmax(prediction_ee2), np.argmax(prediction_eefinal)
-		  	score_max_1_ee1, score_max_1_ee2, score_max_1_eefinal = max(prediction_ee1), max(prediction_ee2), max(prediction_eefinal)
+		  	arg_max_1_ee1, arg_max_1_ee2, arg_max_1_eefinal  = np.argmax(prediction_ee1[i]), np.argmax(prediction_ee2[i]), np.argmax(prediction_eefinal[i])
+		  	score_max_1_ee1, score_max_1_ee2, score_max_1_eefinal = max(prediction_ee1[i]), max(prediction_ee2[i]), max(prediction_eefinal[i])
 
 		  	isCorrect = int(truth) == int(arg_max_1_ee1)
 		  	prediction_dict_ee1.update({str(count): {'prediction':str(arg_max_1_ee1), 'truth':str(truth), 'isCorrect': str(isCorrect), 
@@ -178,8 +178,8 @@ def generate_trace_prior(test_data, test_labels, model_name, model_arch):
 		  	isCorrect = int(truth) == int(arg_max_1_eefinal)
 		  	prediction_dict_eefinal.update({str(count): {'prediction':str(arg_max_1_eefinal), 'truth':str(truth), 'isCorrect': str(isCorrect), 
 				  'score_max_1' : str(score_max_1_eefinal), 'arg_max_1' : str(arg_max_1_eefinal) }})
+		  	count+=1
 
-	
   	#dump trace data
 		with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee1.json', 'w') as fp:
 		 json.dump(prediction_dict_ee1, fp, indent=4)
@@ -197,8 +197,8 @@ def generate_trace_prior(test_data, test_labels, model_name, model_arch):
 		  #collect trace for each pred in batch
 		  for i in range(0, BS):
 		  	truth = test_label.numpy()[i]
-		  	arg_max_1_ee1, arg_max_1_ee2, arg_max_1_ee3, arg_max_1_eefinal  = np.argmax(prediction_ee1), np.argmax(prediction_ee2), np.argmax(prediction_ee3), np.argmax(prediction_eefinal)
-		  	score_max_1_ee1, score_max_1_ee2, score_max_1_ee2, score_max_1_eefinal = max(prediction_ee1), max(prediction_ee2), max(prediction_ee3), max(prediction_eefinal)
+		  	arg_max_1_ee1, arg_max_1_ee2, arg_max_1_ee3, arg_max_1_eefinal  = np.argmax(prediction_ee1[i]), np.argmax(prediction_ee2[i]), np.argmax(prediction_ee3[i]), np.argmax(prediction_eefinal[i])
+		  	score_max_1_ee1, score_max_1_ee2, score_max_1_ee3, score_max_1_eefinal = max(prediction_ee1[i]), max(prediction_ee2[i]), max(prediction_ee3[i]), max(prediction_eefinal[i])
 
 		  	isCorrect = int(truth) == int(arg_max_1_ee1)
 		  	prediction_dict_ee1.update({str(count): {'prediction':str(arg_max_1_ee1), 'truth':str(truth), 'isCorrect': str(isCorrect), 
@@ -207,12 +207,12 @@ def generate_trace_prior(test_data, test_labels, model_name, model_arch):
 		  	prediction_dict_ee2.update({str(count): {'prediction':str(arg_max_1_ee2), 'truth':str(truth), 'isCorrect': str(isCorrect), 
 		      'score_max_1' : str(score_max_1_ee2), 'arg_max_1' : str(arg_max_1_ee2) }})
 		  	isCorrect = int(truth) == int(arg_max_1_ee3)
-		  	prediction_dict_ee2.update({str(count): {'prediction':str(arg_max_1_ee3), 'truth':str(truth), 'isCorrect': str(isCorrect), 
+		  	prediction_dict_ee3.update({str(count): {'prediction':str(arg_max_1_ee3), 'truth':str(truth), 'isCorrect': str(isCorrect), 
 		      'score_max_1' : str(score_max_1_ee3), 'arg_max_1' : str(arg_max_1_ee3) }})
 		  	isCorrect = int(truth) == int(arg_max_1_eefinal)
 		  	prediction_dict_eefinal.update({str(count): {'prediction':str(arg_max_1_eefinal), 'truth':str(truth), 'isCorrect': str(isCorrect), 
 				  'score_max_1' : str(score_max_1_eefinal), 'arg_max_1' : str(arg_max_1_eefinal) }})
-
+		  	count+=1
   	#dump trace data
 		with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee1.json', 'w') as fp:
 		 json.dump(prediction_dict_ee1, fp, indent=4)
@@ -228,15 +228,23 @@ def generate_trace_prior(test_data, test_labels, model_name, model_arch):
 
 
 # return points for scatter plot
-def calculate_scatter_points_prior(model_name, total_samples):
+def calculate_scatter_points_prior(model_name, model_arch, total_samples):
 	#get flops count when using ee1 only, ee1+ee2 and when using ee1+ee2+ef
-	flops_ee1, flops_ee2, flops_eefinal = get_flops_prior(model_name)
+	if model_arch=='branchynet':
+		flops_ee1, flops_ee2, flops_eefinal = get_flops_prior(model_name, model_arch)
+	else:
+		flops_ee1, flops_ee2, flops_ee3, flops_eefinal = get_flops_prior(model_name, model_arch)
 	x_axis_accuracy, y_axis_flops =[], []
 	#vary the ee exit confidence criteria (rho from Eq1)  from 0.0 to 1.0 in steps of 0.01
 	for rho in list(np.linspace(0.01,1.0, 101)):
-		EE_1_cnt,EE_2_cnt, EE_final_cnt, EE_1_correct,EE_2_correct, EE_final_correct = calc_accuracy_prior(model_name, rho)
-		total_accuracy = ((EE_1_correct+EE_2_correct+ EE_final_correct)*100)/total_samples
-		flops_total = (flops_ee1*EE_1_cnt + flops_ee2*EE_2_cnt + flops_eefinal*EE_final_cnt )/total_samples
+		if model_arch=='branchynet':
+			EE_1_cnt,EE_2_cnt, EE_final_cnt, EE_1_correct,EE_2_correct, EE_final_correct = calc_accuracy_branchynet(model_name, rho)
+			total_accuracy = ((EE_1_correct+EE_2_correct+ EE_final_correct)*100)/total_samples
+			flops_total = (flops_ee1*EE_1_cnt + flops_ee2*EE_2_cnt + flops_eefinal*EE_final_cnt )/total_samples
+		else:
+			EE_1_cnt,EE_2_cnt,EE_3_cnt, EE_final_cnt, EE_1_correct,EE_2_correct, EE_3_correct, EE_final_correct = calc_accuracy_sdn(model_name, rho)
+			total_accuracy = ((EE_1_correct+EE_2_correct+EE_2_correct+EE_final_correct)*100)/total_samples
+			flops_total = (flops_ee1*EE_1_cnt + flops_ee2*EE_2_cnt + flops_ee3*EE_3_cnt + flops_eefinal*EE_final_cnt )/total_samples
 		flops_total = flops_total/1000000 #divide by 1.0E+6 
 		x_axis_accuracy.append(total_accuracy)
 		y_axis_flops.append(flops_total)
@@ -250,7 +258,7 @@ def calc_accuracy_branchynet(model_name, rho):
     predict_dict_ee1 = json.load(fp)
   with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee2.json', 'r') as fp:
     predict_dict_ee2 = json.load(fp)
-  with open('trace_data/''trace_data_'+model_name[15:]+'_eefinal.json', 'r') as fp:
+  with open('trace_data/''trace_data_'+model_name[15:]+'_ef.json', 'r') as fp:
     predict_dict_eefinal = json.load(fp)
 
   EE_1_correct, EE_2_correct, EE_final_correct = 0,0,0
@@ -283,20 +291,19 @@ def calc_accuracy_branchynet(model_name, rho):
 #benefit curve
 def calc_accuracy_sdn(model_name, rho):
   #read trace data of model
-  with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee1_ref.json', 'r') as fp:
+  with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee1.json', 'r') as fp:
     predict_dict_ee1 = json.load(fp)
-  with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee2_ref.json', 'r') as fp:
+  with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee2.json', 'r') as fp:
     predict_dict_ee2 = json.load(fp)
-  with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee3_ref.json', 'r') as fp:
+  with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee3.json', 'r') as fp:
     predict_dict_ee3 = json.load(fp)
-  with open('trace_data/''trace_data_'+model_name[15:]+'_eefinal_ref.json', 'r') as fp:
+  with open('trace_data/''trace_data_'+model_name[15:]+'_ef.json', 'r') as fp:
     predict_dict_eefinal = json.load(fp)
 
   EE_1_correct, EE_2_correct, EE_3_correct, EE_final_correct = 0,0,0,0
   EE_1_cnt, EE_2_cnt, EE_3_cnt, EE_final_cnt = 0,0,0,0
 
   for num, pred in predict_dict_ee1.items():
-    prob_list = [float(x) for x in pred['probability']]
     truth = int(pred['truth'])
     arg_max_1, score_max_1 = int(pred['truth']), float(pred['score_max_1'])
     if score_max_1>=rho:

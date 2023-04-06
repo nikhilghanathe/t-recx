@@ -318,6 +318,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
         for i in range(0, self.batch_size):
             arg_max_true = tf.keras.backend.argmax(targets[i])
             arg_max_true = tf.cast(arg_max_true, dtype='int32')
+            arg_max_true = tf.reshape(arg_max_true, [1])
             y_true.append(tf.one_hot([arg_max_true], depth=self.num_classes, on_value=1., off_value=0.0, dtype='float32'))
         
         #compute loss for whole batch

@@ -153,7 +153,6 @@ def get_flops_prior(model_name):
 	exit_list = ['ee_1', 'ee_2', 'ef_out']
 	flops = []
 	for i in range(0, len(exit_list)):
-		print(exit_list[:i+1])
 		new_model = get_ee_model(model, exit_list[:i+1])
 		flops.append(get_flops(new_model, batch_size=1))
 	return flops[0], flops[1], flops[2]
