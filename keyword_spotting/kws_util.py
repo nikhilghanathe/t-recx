@@ -251,7 +251,7 @@ def save_trecx_model(model, model_save_name, model_arch):
         cnt+=1
     #construct new model
     final_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[ee_layer_num].output, model.layers[ef_layer_num].output])
-    final_model.model.compile(optimizer=keras.optimizers.Adam(learning_rate=args.learning_rate),  # Optimizer
+    final_model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.001),  # Optimizer
         loss=keras.losses.SparseCategoricalCrossentropy(),
         loss_weights=None,
         metrics=[keras.metrics.SparseCategoricalAccuracy()],
@@ -270,8 +270,9 @@ def save_trecx_model(model, model_save_name, model_arch):
             ef_layer_num = cnt
         cnt+=1
     #construct new model
-    final_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[ee1_layer_num].output, model.layers[ee2_layer_num].output, model.layers[ee3_layer_num].output, model.layers[ef_layer_num].output])
-    final_model.model.compile(optimizer=keras.optimizers.Adam(learning_rate=args.learning_rate),  # Optimizer
+    final_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[ee1_layer_num].output, model.layers[ee2_layer_num].output, 
+      model.layers[ee3_layer_num].output, model.layers[ef_layer_num].output])
+    final_model.compile(optimizer=keras.optimizers.Adam(learning_rate=0.001),  # Optimizer
         loss=keras.losses.SparseCategoricalCrossentropy(),
         loss_weights=None,
         metrics=[keras.metrics.SparseCategoricalAccuracy()],

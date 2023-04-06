@@ -27,7 +27,7 @@ import helpers, Config
 
 
 # ===============================================================================
-#plot the benefit curve with and without weight transfer (Fig 4a from the paper)
+#plot the benefit curve with and without weight transfer (Fig 4b from the paper)
 def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     #calc benefit curve with EV-assistance
     x_axis_accuracy_ev, y_axis_flops_ev = helpers.calculate_scatter_points(model_name_ev, total_samples)
@@ -80,60 +80,11 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
 
 
 
-#Plot the violin plot of Fig 5
-# Violin Plot of medium confidence predictions (0.65 < 𝑚𝑎𝑥 (𝑠𝑜𝑓𝑡𝑚𝑎𝑥𝑠𝑐𝑜𝑟𝑒𝑠) ≤ 0.9)
-def plot_violin_plot(model_name_ev, model_name_baseline):
-    #read model trace data of early-exit
-    with open('trace_data/'+'trace_data_'+model_name_ev[15:]+'_ee.json', 'r') as fp:
-        predict_dict_trecx = json.load(fp)
-    #read model trace data without t-recx early-exit block (baseline)
-    with open('trace_data/'+'trace_data_'+model_name_baseline[15:]+'_ee.json', 'r') as fp:
-        predict_dict_baseline = json.load(fp)
-
-    #record the confidence of all prediction in the medium confidence region
-    confidence_data_trecx = []
-    for num, pred in predict_dict_trecx.items():
-        score = float(pred['score_max_1'])
-        if score <0.9 and score>=0.65:
-            confidence_data_trecx.append(score)
-    confidence_data_baseline = []
-    for num, pred in predict_dict_baseline.items():
-        score = float(pred['score_max_1'])
-        if score <0.9 and score>=0.65:
-            confidence_data_baseline.append(score)
-
-
-    #plot the confidence
-    fig, ax = plt.subplots()
-    ax.set_xticks([1,2])
-    ax.set_yticks([0.8, 0.85, 0.9, 0.95, 1.0])
-    xticklabels=['Baseline EE', 'T-RECX EE']
-    ax.set_xticklabels(xticklabels, fontsize=36)
-    yticklabels=[0.8, 0.85, 0.9, 0.95, 1.0]
-    ax.set_yticklabels(yticklabels, fontsize=28)
-    data = [confidence_data_baseline, confidence_data_trecx]
-    ax.violinplot( data,  showmeans=False, showmedians=True)
-    ax.yaxis.grid(True)
-    plt.yscale('linear')
-    plt.ylabel('Confidence', fontsize=42)
-    plt.legend()
-    # plt.show()
-    os.chdir('results')
-    fig = plt.gcf()
-    fig.set_size_inches((20, 15), forward=False)
-    fig.savefig('Fig5.png', dpi=1000)
-    os.chdir('..')
-
-
-
-
-
-
 
 # ----------------------------------------------------------------------------------------
 # --------------Comparison with prior works-----------------------------------------------
 # ----------------------------------------------------------------------------------------
-# Plot the benefit curve of resnet with trecx, branchynet and SDN techniques
+# Plot the benefit curve of resnet with trecx, branchynet and SDN techniques - Fig 7b
 def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchynet, total_samples):
     # x_axis_accuracy_ev, y_axis_flops_ev = helpers.calculate_scatter_points(model_name_ev, total_samples)
     x_axis_accuracy_sdn, y_axis_flops_sdn = helpers.calculate_scatter_points_prior(model_name_sdn, total_samples)
@@ -143,7 +94,7 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     plt.scatter(Config.accuracy_noEE, Config.flops_noEE, label='no EE', color = 'red')
     plt.vlines(Config.accuracy_noEE, 0,Config.flops_noEE, linestyles='dashed', color='orange')
     plt.hlines(Config.flops_noEE, 0,Config.accuracy_noEE, linestyles='dashed', color='orange')
-    # plt.scatter(x_axis_accuracy_ev, y_axis_flops_ev, color='blue', label='T-RECX')
+    plt.scatter(x_axis_accuracy_ev, y_axis_flops_ev, color='blue', label='T-RECX')
     plt.scatter(x_axis_accuracy_sdn, y_axis_flops_sdn, color='yellow', label='SDN')
     plt.scatter(x_axis_accuracy_branchynet, y_axis_flops_branchynet, color='green', label='BRANCHYNET')
     plt.title('Flops vs Accuracy tradeoff (Comparison with Prior works) Fig7a')

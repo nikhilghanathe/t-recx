@@ -14,17 +14,6 @@ import tensorflow as tf
 import Config
 
 
-label_list = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck','uncertain']
-
-
-def get_ground_truth(id, labels):
-    return labels[id]
-
-def isCorrectPred(pred):
-    truth, prediction = pred['truth'], pred['prediction']
-    return int(truth)==int(prediction)
-
-
 #read the trace data 
 # takes rho as an argument. Reads the trace data and calculates the overall accuracy of the model based on Eq1 & Eq2 from the paper
 def calc_accuracy(model_name, rho, total_samples):
@@ -55,30 +44,13 @@ def calc_accuracy(model_name, rho, total_samples):
 #return flops when using 1)early exit and 2) final exit
 def get_flops_ee_ef(model_name):
 	model = tf.keras.models.load_model(model_name)
-	#get flops of ee only
-	output_layer_nums = []
-	cnt = 0
-	for layer in model.layers:
-		if layer.name in ['ee_out']:
-		  output_layer_nums.append(cnt)
-		cnt+=1
-	new_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[output_layer_nums[0]].output])
-	new_model.compile(optimizer=tf.keras.optimizers.Adam(0.001),loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-	flops_ee = get_flops(new_model, batch_size=1)
-
-	#get flops of ee+ef
-	output_layer_nums = []
-	cnt = 0
-	for layer in model.layers:
-		if layer.name in ['ee_out', 'ef_out']:
-		  output_layer_nums.append(cnt)
-		cnt+=1
-	new_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[output_layer_nums[0]].output, model.layers[output_layer_nums[1]].output])
-	new_model.compile(optimizer=tf.keras.optimizers.Adam(0.001),loss='sparse_categorical_crossentropy', metrics=['accuracy'])
-	flops_ef = get_flops(new_model, batch_size=1)
-
-	return flops_ee, flops_ef
-
+	#get flops of ee and ef 
+	exit_list = ['ee_out', 'ef_out']
+	flops = []
+	for i in range(0, len(exit_list)):
+		new_model = get_ee_model(model, exit_list[:i+1])
+		flops.append(get_flops(new_model, batch_size=1))
+	return flops[0], flops[1]
 
 
 # return points for scatter plot
@@ -97,6 +69,10 @@ def calculate_scatter_points(model_name, total_samples):
 		y_axis_flops.append(flops_total)
 	return x_axis_accuracy, y_axis_flops
 
+def collect_pred_metrics(prob_list):
+	score_max_1, score_max_2 = sorted(prob_list)[-1], sorted(prob_list)[-2]
+	arg_max_1, arg_max_2 = np.argmax(prob_list), np.argsort(prob_list)[-2]
+	return score_max_1, score_max_2, arg_max_1, arg_max_2
 
 #generate trace data and dump into json files for faster access to prediction behavior
 def generate_trace(val_generator, model_name):
@@ -158,15 +134,15 @@ def get_flops_prior(model_name, model_arch):
 	if model_arch=='branchynet':
 		exit_list = ['ee_1', 'ee_2', 'ef_out']
 		for i in range(0, len(exit_list)):
-			new_model = get_ee_model(model, exit_list[:i])
+			new_model = get_ee_model(model, exit_list[:i+1])
 			flops.append(get_flops(new_model, batch_size=1))
-		return flops
+		return flops[0], flops[1], flops[2]
 	else:
 		exit_list = ['ee_1', 'ee_2', 'ee_3', 'ef_out']
 		for i in range(0, len(exit_list)):
-			new_model = get_ee_model(model, exit_list[:i])
+			new_model = get_ee_model(model, exit_list[:i+1])
 			flops.append(get_flops(new_model, batch_size=1))
-		return flops
+		return flops[0], flops[1], flops[2], flops[3]
 
 
 
@@ -354,45 +330,3 @@ def calc_accuracy_sdn(model_name, rho):
 
 
 
-# ----trecx train util functions-------------------
-def save_trecx_model(model, model_save_name, model_arch):
-	if model_arch=='resnet_ev' or model_arch=='resnet_noev':
-		cnt = 0
-		for layer in model.layers:
-			if layer.name=='ee_out':
-			    ee_layer_num = cnt
-			if layer.name=='ef_out':
-			    ef_layer_num = cnt
-			cnt+=1
-	    #construct new model
-		final_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[ee_layer_num].output, model.layers[ef_layer_num].output])
-		final_model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics='accuracy', 
-		    loss_weights=None,weighted_metrics=None, run_eagerly=False)
-		final_model.save("trained_models/" + model_save_name)
-	elif model_arch=='resnet_sdn':
-		cnt = 0
-		for layer in model.layers:
-		    if layer.name=='ee_1':
-		        ee1_layer_num = cnt
-		    if layer.name=='ee_2':
-		        ee2_layer_num = cnt
-		    if layer.name=='ef_out':
-		        ef_layer_num = cnt
-		    cnt+=1
-		#construct new model
-		final_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[ee1_layer_num].output, model.layers[ee2_layer_num].output, model.layers[ef_layer_num].output])
-		final_model.compile(optimizer=optimizer, loss='sparse_categorical_crossentropy', metrics='accuracy', 
-		    loss_weights=None,weighted_metrics=None, run_eagerly=False)
-		final_model.save("trained_models/" + model_save_name)
-	else:
-		model.save('trained_models/'+ model_save_name)
-
-
-
-def get_loss_weights(model_arch):
-	if model_arch=='resnet_sdn':
-		return Config.loss_weights_sdn
-	elif model_arch=='resnet_branchynet':
-		return Config.loss_weights_branchynet
-	else:
-		return None

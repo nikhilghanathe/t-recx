@@ -55,31 +55,13 @@ def calc_accuracy(model_name, rho, total_samples):
 #return flops when using 1)early exit and 2) final exit
 def get_flops_ee_ef(model_name):
 	model = tf.keras.models.load_model(model_name)
-	#get flops of ee only
-	output_layer_nums = []
-	cnt = 0
-	for layer in model.layers:
-		if layer.name in ['ee_out']:
-		  output_layer_nums.append(cnt)
-		cnt+=1
-	new_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[output_layer_nums[0]].output])
-	new_model.compile(optimizer=tf.keras.optimizers.Adam(0.001),loss='categorical_crossentropy', metrics=['accuracy'])
-	flops_ee = get_flops(new_model, batch_size=1)
-
-	#get flops of ee+ef
-	output_layer_nums = []
-	cnt = 0
-	for layer in model.layers:
-		if layer.name in ['ee_out', 'ef_out']:
-		  output_layer_nums.append(cnt)
-		cnt+=1
-	new_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[output_layer_nums[0]].output, model.layers[output_layer_nums[1]].output])
-	new_model.compile(optimizer=tf.keras.optimizers.Adam(0.001),loss='categorical_crossentropy', metrics=['accuracy'])
-	flops_ef = get_flops(new_model, batch_size=1)
-
-	return flops_ee, flops_ef
-
-
+	#get flops of ee and ef 
+	exit_list = ['ee_out', 'ef_out']
+	flops = []
+	for i in range(0, len(exit_list)):
+		new_model = get_ee_model(model, exit_list[:i+1])
+		flops.append(get_flops(new_model, batch_size=1))
+	return flops[0], flops[1]
 
 # return points for scatter plot
 def calculate_scatter_points(model_name, total_samples):
@@ -155,47 +137,26 @@ def generate_trace(test_data, test_labels, model_name):
 # -----------------------------------------------------------------------------------------
 # -------------Helper functions for comparison with branchynet and SDN---------------------
 # -----------------------------------------------------------------------------------------
+def get_ee_model(model, exit_names):
+	cnt = 0
+	output_layers = []
+	for layer in model.layers:
+		if layer.name in exit_names:
+		 	output_layers.append(model.layers[cnt].output)
+		cnt+=1
+	new_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=output_layers)
+	new_model.compile(optimizer=tf.keras.optimizers.Adam(0.001),loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+	return new_model
+
 def get_flops_prior(model_name):
 	model = tf.keras.models.load_model(model_name)
-	#get flops of ee_1
-	output_layer_nums = []
-	cnt = 0
-	for layer in model.layers:
-		if layer.name in ['ee_1']:
-		 	output_layer_nums.append(cnt)
-		cnt+=1
-	new_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[output_layer_nums[0]].output])
-	new_model.compile(optimizer=tf.keras.optimizers.Adam(0.001),loss='categorical_crossentropy', metrics=['accuracy'])
-	flops_ee_1 = get_flops(new_model, batch_size=1)
-
-	#get flops of ee_1 and ee_2
-	output_layer_nums = []
-	cnt = 0
-	for layer in model.layers:
-		if layer.name in ['ee_1', 'ee_2']:
-		 	output_layer_nums.append(cnt)
-		cnt+=1
-	new_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[output_layer_nums[0]].output, model.layers[output_layer_nums[1]].output])
-	new_model.compile(optimizer=tf.keras.optimizers.Adam(0.001),loss='categorical_crossentropy', metrics=['accuracy'])
-	flops_ee_2 = get_flops(new_model, batch_size=1)
-
-
-	#get flops of ee_1 and ee_2 and dense (whole model)
-	output_layer_nums = []
-	cnt = 0
-	for layer in model.layers:
-		# if layer.name in ['ee_1', 'ee_2', 'ef_out']:
-		if layer.name in ['ee_1', 'ee_2', 'dense']:
-		 	output_layer_nums.append(cnt)
-		cnt+=1
-	new_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[output_layer_nums[0]].output, model.layers[output_layer_nums[1]].output, model.layers[output_layer_nums[2]].output])
-	new_model.compile(optimizer=tf.keras.optimizers.Adam(0.001),loss='categorical_crossentropy', metrics=['accuracy'])
-	flops_final = get_flops(new_model, batch_size=1)
-
-	return flops_ee_1, flops_ee_2, flops_final
-
-
-
+	exit_list = ['ee_1', 'ee_2', 'ef_out']
+	flops = []
+	for i in range(0, len(exit_list)):
+		print(exit_list[:i+1])
+		new_model = get_ee_model(model, exit_list[:i+1])
+		flops.append(get_flops(new_model, batch_size=1))
+	return flops[0], flops[1], flops[2]
 
 # =========collect trace data =================================
 def generate_trace_prior(test_data, test_labels, model_name):
@@ -310,7 +271,7 @@ def save_trecx_model(model, model_save_name, model_arch):
 			cnt+=1
 	    #construct new model
 		final_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[ee_layer_num].output, model.layers[ef_layer_num].output])
-		final_model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics='accuracy', 
+		final_model.compile(optimizer=tf.keras.optimizers.Adam(), loss='categorical_crossentropy', metrics='accuracy', 
 		    loss_weights=None,weighted_metrics=None, run_eagerly=False)
 		final_model.save("trained_models/" + model_save_name)
 	elif model_arch=='resnet_sdn':
@@ -325,7 +286,7 @@ def save_trecx_model(model, model_save_name, model_arch):
 		    cnt+=1
 		#construct new model
 		final_model = tf.keras.models.Model(inputs=model.inputs[0], outputs=[model.layers[ee1_layer_num].output, model.layers[ee2_layer_num].output, model.layers[ef_layer_num].output])
-		final_model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics='accuracy', 
+		final_model.compile(optimizer=tf.keras.optimizers.Adam(), loss='categorical_crossentropy', metrics='accuracy', 
 		    loss_weights=None,weighted_metrics=None, run_eagerly=False)
 		final_model.save("trained_models/" + model_save_name)
 	else:

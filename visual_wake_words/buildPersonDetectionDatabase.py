@@ -9,7 +9,7 @@ import os
 # Parameters, change directories for a local run
 useLocalCoco=True
 debugCats=False
-debugPlot=True
+debugPlot=False
 dataDir=os.getcwd()
 annDir='annotations/'
 
@@ -48,7 +48,7 @@ def generateInstance(dataType, outputDataDir):
         os.makedirs('%s/non_%s'%(outputDataDir,wakeword))
 
     # Loop over all images and process
-    print(dataType + ', wrinting ' + str(len(coco.imgs)) + ' images...');
+    print(dataType + ', writing ' + str(len(coco.imgs)) + ' images...');
     index = 0
     for image in coco.imgs:
         # Read image
@@ -109,6 +109,6 @@ def generateInstance(dataType, outputDataDir):
 # generateInstance(dataType, outputDataDir)
 
 # Then for validation set, COCO2014
-outputDataDir = './vw_coco2014_96_2p5b'
+outputDataDir = './minival'
 dataType='val2017'
 generateInstance(dataType, outputDataDir)

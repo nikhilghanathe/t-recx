@@ -54,8 +54,10 @@ if __name__ == '__main__':
 
 
   #append ffmpeg path to system path
-  pwd = os.getcwd()
-  sys.path.append(pwd+'/ffmpeg-5.0-amd64-static/')
+  # pwd = os.getcwd()
+  # sys.path.append(pwd+'/ffmpeg')
+  # print(sys.path)
+  
 
   # this is taken from the dataset web page.
   # there should be a better way than hard-coding this

@@ -20,10 +20,12 @@ import json
 import sys
 import argparse
 from helpers import get_loss_weights, save_trecx_model
+import Config
 
-EPOCHS = 500
-# EPOCHS = 1
-BS = 32
+
+
+EPOCHS = Config.epochs
+BS = Config.batch_size
 
 # get date ant time to save model
 dt = datetime.datetime.today()

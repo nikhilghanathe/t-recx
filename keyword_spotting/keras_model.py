@@ -15,6 +15,8 @@ from tensorflow.keras.layers import Conv2D, DepthwiseConv2D, AveragePooling2D, G
 from tensorflow.keras.regularizers import l2
 import Config
 from kws_util import get_loss_weights
+import Config
+
 
 # =========================keras model for t-recx=============================
 
@@ -33,7 +35,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
         
         y_true, y_true_transformed = [], []
         if self.batch_size==None:
-            self.batch_size=100
+            self.batch_size=Config.BATCH_SIZE
         #compute the one hot 'y_true' vector for loss computation
         for i in range(0, self.batch_size):
             arg_max_true = tf.keras.backend.argmax(targets[i])
@@ -582,7 +584,7 @@ def get_model(args):
     conv_ee1_fmaps_pooled = AveragePooling2D(pool_size=pool_size)(conv_ee1_fmaps)
     y_ee_1 = Flatten(name='flatten_ee1')(conv_ee1_fmaps_pooled)
     ee_1_logits = Dense(model_settings['label_count'])(y_ee_1)
-    ee_1 = Softmax(name='ee_1')(ee_1_logits)
+    ee_1 = Softmax(name='ee_out')(ee_1_logits)
 
     #concatenate the ee-fmaps with final-fmaps at the final exit
     x_pooled = AveragePooling2D(pool_size=final_pool_size)(x)

@@ -13,3 +13,8 @@ accuracy_noEE = 87.2
 #loss weights for sdn and branchynet
 loss_weights_branchynet = [1,0.3,1]
 loss_weights_sdn = [0,0,1]
+
+#hyperparameters
+epochs = 500
+# epochs = 1
+batch_size = 32

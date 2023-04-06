@@ -3,6 +3,9 @@ vw_coco2014_96.tar.gz
 __pycache__/
 vw_coco2014_96/
 val2017/
+val2017.zip
+annotations_trainval2017.zip
+minival/
 annotations/
 *.txt
 *.out

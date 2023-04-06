@@ -111,7 +111,7 @@ def plot_violin_plot(model_name_ev, model_name_baseline):
     ax.yaxis.grid(True)
     plt.yscale('linear')
     plt.ylabel('Confidence', fontsize=42)
-    plt.legend()
+    # plt.legend()
     # plt.show()
     os.chdir('results')
     fig = plt.gcf()
@@ -182,30 +182,24 @@ if __name__ == "__main__":
     
 
 
-    #=========Generate Fig 4a=============================
-    #generate trace_data for EV-assist and noEV-assist models
-    # print('=====================================')
-    # print('Generating trace data. This may take several minutes (20-30min) to complete...')
-    # print('=====================================')
-    # helpers.generate_trace(test_data, test_labels, Config.model_name_ev)
-    # helpers.generate_trace(test_data, test_labels, Config.model_name_noev)
-    # helpers.generate_trace(test_data, test_labels, Config.model_baseline_ee)
-    # print('DONE!')
-    # #plot the benefit curve
-    # print('=====================================')
-    # print('Plotting benefit curve...The image will be saved in results/Fig4a.png')
-    # print('=====================================')
-    # plot_benefit_curve(Config.model_name_ev, Config.model_name_noev, total_samples=int(test_labels.shape[0]))
-    # print('DONE!\n\n')
+    # =========Generate Fig 4a=============================
+    # generate trace_data for EV-assist and noEV-assist models
+    print('=====================================')
+    print('Generating trace data. This may take several minutes (20-30min) to complete...')
+    print('=====================================')
+    helpers.generate_trace(test_data, test_labels, Config.model_name_ev)
+    helpers.generate_trace(test_data, test_labels, Config.model_name_noev)
+    helpers.generate_trace(test_data, test_labels, Config.model_baseline_ee)
+    print('DONE!')
+    #plot the benefit curve
+    print('=====================================')
+    print('Plotting benefit curve...The image will be saved in results/Fig4a.png')
+    print('=====================================')
+    plot_benefit_curve(Config.model_name_ev, Config.model_name_noev, total_samples=int(test_labels.shape[0]))
+    print('DONE!\n\n')
     # ====================================================
 
 
-    # #=========Generate Fig 5===========================
-    # print('=====================================')
-    # print('Plotting Violin plot...The image will be saved in results/Fig5.png')
-    # print('=====================================')
-    # plot_violin_plot(Config.model_name_noev, Config.model_baseline_ee)
-    # print('DONE!\n\n')
 
 
     #=========Generate Fig 7a===========================
@@ -224,3 +218,11 @@ if __name__ == "__main__":
     print('DONE!\n\n')
     # ====================================================
     
+
+    #=========Generate Fig 5===========================
+    print('=====================================')
+    print('Plotting Violin plot...The image will be saved in results/Fig5.png')
+    print('=====================================')
+    plot_violin_plot(Config.model_name_noev, Config.model_baseline_ee)
+    print('DONE!\n\n')
+    # ====================================================
