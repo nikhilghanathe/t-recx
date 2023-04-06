@@ -84,9 +84,9 @@ def main(argv):
   print(train_generator.class_indices)
 
   # train model in 3 iterations
-  model = train_epochs(model, train_generator, val_generator, Config.epochs_0, 0.001, model_save_name, 0)
-  model = train_epochs(model, train_generator, val_generator, Config.epochs_1, 0.0005, model_save_name, 1)
-  model = train_epochs(model, train_generator, val_generator, Config.epochs_2, 0.00025, model_save_name, 2)
+  model = train_epochs(model, train_generator, val_generator, Config.epochs_0, 0.001, model_save_name, 0, model_architecture)
+  model = train_epochs(model, train_generator, val_generator, Config.epochs_1, 0.0005, model_save_name, 1, model_architecture)
+  model = train_epochs(model, train_generator, val_generator, Config.epochs_2, 0.00025, model_save_name, 2, model_architecture)
 
   # Save model
   save_trecx_model(model, model_save_name, model_architecture)
