@@ -5,7 +5,7 @@
 nvidia-smi -q | grep -E '(Name|UUID)'
 
 eval "$(conda shell.bash hook)"
-conda activate tiny
+conda activate trecx
 
 python train_resnet.py --model_architecture=resnet_branchynet --model_save_name=model_branchynet
 
