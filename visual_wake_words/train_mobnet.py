@@ -128,21 +128,29 @@ class weight_transfer_callback(tf.keras.callbacks.Callback):
 
 
 def train_epochs(model, train_generator, val_generator, epoch_count,
-                 learning_rate, model_name, train_count):
+                 learning_rate, model_name, train_count, model_architecture):
 
   model.compile(
       optimizer=tf.keras.optimizers.Adam(learning_rate),
       loss='categorical_crossentropy',
       metrics=['accuracy'], loss_weights=None, run_eagerly=False)
 
-
-  history_fine = model.fit(
-      custom_generator_train(train_generator),#use trecx custom datagen
-      steps_per_epoch=len(train_generator),
-      epochs=epoch_count,
-      validation_data=custom_generator_train(val_generator),
-      validation_steps=len(val_generator),
-      batch_size=Config.BATCH_SIZE, callbacks=[weight_transfer_callback(epoch_count, train_count)])
+  if model_architecture=='mobnet_ev':
+    history_fine = model.fit(
+        custom_generator_train(train_generator),#use trecx custom datagen
+        steps_per_epoch=len(train_generator),
+        epochs=epoch_count,
+        validation_data=custom_generator_train(val_generator),
+        validation_steps=len(val_generator),
+        batch_size=Config.BATCH_SIZE, callbacks=[weight_transfer_callback(epoch_count, train_count)])
+  else:
+    history_fine = model.fit(
+        custom_generator_train(train_generator),#use trecx custom datagen
+        steps_per_epoch=len(train_generator),
+        epochs=epoch_count,
+        validation_data=custom_generator_train(val_generator),
+        validation_steps=len(val_generator),
+        batch_size=Config.BATCH_SIZE, callbacks=[])
   
   return model
 
