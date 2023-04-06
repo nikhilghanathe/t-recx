@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 import tensorflow as tf
-from tf.keras.callbacks import LearningRateScheduler
+from tensorflow.keras.callbacks import LearningRateScheduler
 from tensorflow.keras.utils import to_categorical
 import keras_model as keras_model
 
