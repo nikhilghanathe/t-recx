@@ -105,7 +105,7 @@ def resnet_v1_eembc():
     x = tf.keras.layers.add([x, y])
     x = Activation('relu')(x)
 
-    x_ee = x
+
 
     # Third stack
 
@@ -173,16 +173,7 @@ def resnet_v1_eembc():
     # # Overall residual, connect weight layer and identity paths
     # x = tf.keras.layers.add([x, y])
     # x = Activation('relu')(x)
-    pool_size = [4,4]
-    x_ee = AveragePooling2D(pool_size=pool_size)(x_ee)
-    y_ee = Flatten()(x_ee)
-
-    ee = Dense(num_classes,
-                    activation='softmax',
-                    kernel_initializer='he_normal')(y_ee)
     
-
-
     # Final classification layer.
     pool_size = int(np.amin(x.shape[1:3]))
     x = AveragePooling2D(pool_size=pool_size)(x)
@@ -193,7 +184,7 @@ def resnet_v1_eembc():
                     kernel_initializer='he_normal')(y)
 
     # Instantiate model.
-    model = Model(inputs=inputs, outputs=[ee, outputs])
+    model = Model(inputs=inputs, outputs=outputs)
     return model
 
 
@@ -933,4 +924,152 @@ def resnet_v1_sdn():
 
     # Instantiate model.
     model = Model(inputs=[inputs, targets], outputs=[ee_1, ee_2, outputs])
+    return model
+
+
+
+# Model with baseline EE of simple average pooling at early exit
+def resnet_v1_baselineEE():
+    # Resnet parameters
+    # Resnet parameters
+    input_shape=[32,32,3] # default size for cifar10
+    num_classes=10 # default class number for cifar10
+    num_filters = 16 # this should be 64 for an official resnet model
+
+    # Input layer, change kernel size to 7x7 and strides to 2 for an official resnet
+    inputs = Input(shape=input_shape)
+    x = Conv2D(num_filters,
+                  kernel_size=3,
+                  strides=1,
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=l2(1e-4))(inputs)
+    x = BatchNormalization()(x)
+    x = Activation('relu')(x)
+    #x = MaxPooling2D(pool_size=(2, 2))(x) # uncomment this for official resnet model
+
+
+    # First stack
+
+    # Weight layers
+    y = Conv2D(num_filters,
+                  kernel_size=3,
+                  strides=1,
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=l2(1e-4))(x)
+    y = BatchNormalization()(y)
+    y = Activation('relu')(y)
+    y = Conv2D(num_filters,
+                  kernel_size=3,
+                  strides=1,
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=l2(1e-4))(y)
+    y = BatchNormalization()(y)
+
+    # Overall residual, connect weight layer and identity paths
+    x = tf.keras.layers.add([x, y])
+    x = Activation('relu')(x)
+
+
+    ee_1_fmaps =x
+    
+
+
+    # Second stack
+
+    # Weight layers
+    num_filters = 32 # Filters need to be double for each stack
+    y = Conv2D(num_filters,
+                  kernel_size=3,
+                  strides=2,
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=l2(1e-4))(x)
+    y = BatchNormalization()(y)
+    y = Activation('relu')(y)
+    y = Conv2D(num_filters,
+                  kernel_size=3,
+                  strides=1,
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=l2(1e-4))(y)
+    y = BatchNormalization()(y)
+
+    # Adjust for change in dimension due to stride in identity
+    x = Conv2D(num_filters,
+                  kernel_size=1,
+                  strides=2,
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=l2(1e-4))(x)
+
+    # Overall residual, connect weight layer and identity paths
+    x = tf.keras.layers.add([x, y])
+    x = Activation('relu')(x)
+
+    ee_2_fmaps =x
+
+
+    # Third stack
+
+    # Weight layers
+    num_filters = 64
+    y = Conv2D(num_filters,
+                  kernel_size=3,
+                  strides=2,
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=l2(1e-4))(x)
+    y = BatchNormalization()(y)
+    y = Activation('relu')(y)
+    y = Conv2D(num_filters,
+                  kernel_size=3,
+                  strides=1,
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=l2(1e-4))(y)
+    y = BatchNormalization()(y)
+
+    # Adjust for change in dimension due to stride in identity
+    x = Conv2D(num_filters,
+                  kernel_size=1,
+                  strides=2,
+                  padding='same',
+                  kernel_initializer='he_normal',
+                  kernel_regularizer=l2(1e-4))(x)
+
+    # Overall residual, connect weight layer and identity paths
+    x = tf.keras.layers.add([x, y])
+    x = Activation('relu')(x)
+
+
+    #First EE without uncertain class
+    # pool_size = int(np.amin(x.shape[1:3]))
+    pool_size = (4,4)
+    x_ee_1 = AveragePooling2D(pool_size=pool_size)(ee_1_fmaps)
+    y_ee_1 = Flatten()(x_ee_1)
+    ee_1 = Dense(num_classes,
+                    activation='softmax',
+                    kernel_initializer='he_normal', name='ee_out')(y_ee_1)
+    
+    # pool_size = (4,4)
+    # x_ee_2 = AveragePooling2D(pool_size=pool_size)(ee_2_fmaps)
+    # y_ee_2 = Flatten()(x_ee_2)
+    # ee_2 = Dense(num_classes,
+    #                 activation='softmax',
+    #                 kernel_initializer='he_normal')(y_ee_2)
+    
+    # Final classification layer.
+    pool_size = int(np.amin(x.shape[1:3]))
+    x = AveragePooling2D(pool_size=pool_size)(x)
+    y = Flatten()(x)
+
+    outputs = Dense(num_classes,
+                    activation='softmax',
+                    kernel_initializer='he_normal', name='ef_out')(y)
+
+    # Instantiate model.
+    model = Model(inputs=inputs, outputs=[ee_1, outputs])
     return model

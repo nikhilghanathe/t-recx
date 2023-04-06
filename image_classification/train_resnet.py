@@ -253,7 +253,7 @@ class sdn_callback(tf.keras.callbacks.Callback):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_save_name', type=str, default="""trainedResnet""", 
-        help="""Specify the model architecture to use from: [resnet_ev, resnet_noev, resnet_sdn, resnet_branchynet] """)
+        help="""Specify the model architecture to use from: [resnet_ev, resnet_noev, resnet_sdn, resnet_branchynet, resnet_baselineEE] """)
     parser.add_argument('--model_architecture', type=str, default="""resnet_ev""", 
         help="""Specify the name with which the trained model is saved """)
     parser.add_argument('--W_aux', type=float, default=0.5, 
@@ -298,6 +298,8 @@ if __name__ == "__main__":
             new_model = keras_model.resnet_v1_sdn()            
         elif model_architecture=='resnet_branchynet':
             new_model = keras_model.resnet_v1_branchynet() 
+        elif model_architecture=='resnet_baselineEE':
+            new_model = keras_model.resnet_v1_baselineEE() 
         else:
             raise ValueError("Model architecture {:} not supported".format(model_architecture))           
     new_model.summary()
