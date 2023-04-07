@@ -39,8 +39,8 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     plt.title('Flops vs Accuracy tradeoff (Benefit curve for Resnet) Fig4a')
     plt.ylabel('FLOPS (millions)')
     plt.xlabel('Total Accuracy (%)')
-    plt.xlim([50,90])
-    plt.ylim([0,30])
+    plt.xlim([75,90])
+    plt.ylim([7,30])
 
     #annotate the plot with accuracy and flops of the base model
     label = f"({Config.accuracy_noEE},{Config.flops_noEE})"
@@ -139,7 +139,7 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     plt.vlines(Config.accuracy_noEE, 0,Config.flops_noEE, linestyles='dashed', color='orange')
     plt.hlines(Config.flops_noEE, 0,Config.accuracy_noEE, linestyles='dashed', color='orange')
     plt.scatter(x_axis_accuracy_ev, y_axis_flops_ev, color='blue', label='T-RECX')
-    plt.scatter(x_axis_accuracy_sdn, y_axis_flops_sdn, color='yellow', label='SDN')
+    plt.scatter(x_axis_accuracy_sdn, y_axis_flops_sdn, color='black', label='SDN')
     plt.scatter(x_axis_accuracy_branchynet, y_axis_flops_branchynet, color='green', label='BRANCHYNET')
     plt.title('Flops vs Accuracy tradeoff (Comparison with Prior works) Fig7a')
     plt.ylabel('FLOPS (millions)')
@@ -222,7 +222,7 @@ if __name__ == "__main__":
 
     
     #evaluate models
-    # evaluate_models(test_data, test_labels)
+    evaluate_models(test_data, test_labels)
     
 
     # # =========Generate Fig 4a=============================

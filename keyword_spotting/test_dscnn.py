@@ -201,7 +201,7 @@ if __name__ == "__main__":
     print("Done getting data")
 
     #evaluate models
-    # evaluate_models(ds_test)
+    evaluate_models(ds_test)
     # # =========Generate Fig 4b=============================
     # # generate trace_data for EV-assist and noEV-assist models
     # print('=====================================')
