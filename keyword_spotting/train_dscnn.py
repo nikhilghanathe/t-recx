@@ -93,7 +93,7 @@ if __name__ == '__main__':
 
   if Flags.isTrecx:#if using trecx tecnhiques
     if Flags.isEV:#use weight transfer callback
-      train_hist = model.fit(ds_train, validation_data=ds_val, epochs=Flags.epochs, callbacks=callbacks+[weight_transf_callback()])
+      train_hist = model.fit(ds_train, validation_data=ds_val, epochs=Flags.epochs, callbacks=callbacks+[weight_transf_callback(Flags.epochs)])
     else:
       train_hist = model.fit(ds_train, validation_data=ds_val, epochs=Flags.epochs, callbacks=callbacks)
   else:

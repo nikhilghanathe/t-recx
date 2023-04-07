@@ -347,7 +347,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
 
     def call(self, ee_1, ef_out, targets=None, sample_weight=None):
         if targets is not None:
-            loss = self.loss_fn(ee_1, targets)
+            loss = self.loss_fn(ee_1, ef_out, targets)
             self.add_loss(loss)
             self.add_metric(loss, name='aux_loss', aggregation='mean')
         return ee_1, ef_out
