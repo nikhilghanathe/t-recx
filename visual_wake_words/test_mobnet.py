@@ -76,6 +76,23 @@ def evaluate_models(val_generator):
     print('DONE!\n')
 
 
+    print('========================================================')
+    print('Evaluating T-Recx model with EV-assistance-orig_endpoint...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint)
+    test_metrics = model.evaluate(val_generator)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
+    print('Evaluating T-Recx model without EV-assistance-orig_endpoint...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_noev_orig_endpoint)
+    test_metrics = model.evaluate(val_generator)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+
+
 def main(argv):
   datagen = tf.keras.preprocessing.image.ImageDataGenerator(
       rescale=1. / 255)
@@ -89,7 +106,7 @@ def main(argv):
 
 
   #evaluate models
-  # evaluate_models(val_generator)  
+  evaluate_models(val_generator)  
 
   #=========Generate Fig 4c=============================
   #generate trace_data for EV-assist and noEV-assist models
