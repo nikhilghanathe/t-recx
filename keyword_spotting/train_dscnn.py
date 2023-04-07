@@ -22,8 +22,9 @@ class weight_transf_callback(tf.keras.callbacks.Callback):
     self.no_transfer = False
 
   def on_train_batch_begin(self, batch, logs=None):
-    print(self.no_transfer, self.epoch_threshold_max)
-    if not self.no_transfer:
+    #print(self.no_transfer, self.epoch_threshold_max)
+    #if not self.no_transfer:
+    if True:
       for layer in self.model.layers:
         tf.print(layer.name)
         if layer.name=='depth_conv_ee_1':

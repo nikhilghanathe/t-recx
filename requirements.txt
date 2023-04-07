@@ -23,7 +23,7 @@ google-pasta==0.2.0
 grpcio==1.32.0
 googleapis-common-protos==1.55.0           
 h5py==2.10.0           
-idna==3.2
+idna
 imageio==2.9.0
 joblib==1.0.1
 Keras==2.4.3            
