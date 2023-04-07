@@ -305,7 +305,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
         
 
     @tf.function
-    def loss_fn(self, ee_1, , targets):
+    def loss_fn(self, ee_1, targets):
         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
         W_aux = 0.3
         P_aux = 1.0
@@ -350,7 +350,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
             loss = self.loss_fn(ee_1, targets)
             self.add_loss(loss)
             self.add_metric(loss, name='aux_loss', aggregation='mean')
-        return ee_1, ee_final
+        return ee_1
 
 
 # #define endpoint layer for loss calculation
