@@ -25,7 +25,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
         self.batch_size = Config.BATCH_SIZE
 
     @tf.function
-    def loss_fn(self, ee_1, targets):
+    def loss_fn(self, ee_1, ef_out, targets):
         scce = tf.keras.losses.SparseCategoricalCrossentropy()
         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
         W_aux = 0.3
@@ -74,7 +74,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
 #         self.num_classes = num_classes
 
 #     @tf.function
-#     def loss_fn(self, softmax_output, targets):
+#     def loss_fn(self, softmax_output, ef_out, targets):
 #         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
 #         self.batch_size = targets.shape[0]
         
@@ -95,13 +95,13 @@ class Endpoint_ee(tf.keras.layers.Layer):
 #         return tf.multiply(self.W_aux, loss_cce)
         
 
-    def call(self, softmax_output, targets=None,   sample_weight=None):
+    def call(self, softmax_output, ef_out, targets=None,   sample_weight=None):
         if targets is not None:
             loss = self.loss_fn(softmax_output, targets)
             self.add_loss(loss)
             self.add_metric(loss, name='aux_loss', aggregation='mean')
         #for inference
-        return softmax_output
+        return softmax_output, ef_out
 
 
 #custom loss function that uses tau
@@ -301,7 +301,7 @@ def get_model(args):
 
     #add endpoint layer
     targets = Input(shape=[1], name='input_2')
-    ee_1 = Endpoint_ee(name='endpoint', W_aux=model_settings['W_aux'], num_classes=model_settings['label_count'])(ee_1, targets)
+    ee_1, ee_final = Endpoint_ee(name='endpoint', W_aux=model_settings['W_aux'], num_classes=model_settings['label_count'])(ee_1, ee_final, targets)
     # Instantiate model.
     model = Model(inputs=[inputs, targets], outputs=[ee_1,ee_final])
 
@@ -388,7 +388,7 @@ def get_model(args):
 
     #add endpoint layer
     targets = Input(shape=[1], name='input_2')
-    ee_1 = Endpoint_ee(name='endpoint', W_aux=model_settings['W_aux'], num_classes=model_settings['label_count'])(ee_1, targets)
+    ee_1, ee_final = Endpoint_ee(name='endpoint', W_aux=model_settings['W_aux'], num_classes=model_settings['label_count'])(ee_1, ee_final, targets)
     model = Model(inputs=[inputs, targets], outputs=[ee_1,ee_final])
 
 

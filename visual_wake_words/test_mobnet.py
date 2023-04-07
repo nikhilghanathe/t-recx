@@ -49,7 +49,7 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     plt.legend()
 
     if not os.path.exists('results'):
-        os.makedirs('results')
+      os.makedirs('results')
     os.chdir('results')
     fig = plt.gcf()
     fig.set_size_inches((20, 15), forward=False)
@@ -89,7 +89,7 @@ def main(argv):
 
 
   #evaluate models
-  evaluate_models(val_generator)  
+  # evaluate_models(val_generator)  
 
   #=========Generate Fig 4c=============================
   #generate trace_data for EV-assist and noEV-assist models

@@ -201,7 +201,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
         self.batch_size = 32
 
     @tf.function
-    def loss_fn(self, ee_1, targets):
+    def loss_fn(self, ee_1, ef_out, targets):
         scce = tf.keras.losses.SparseCategoricalCrossentropy()
         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
         W_aux = 0.5
@@ -249,7 +249,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
 #         self.num_classes = num_classes
 
 #     @tf.function
-#     def loss_fn(self, softmax_output, targets):
+#     def loss_fn(self, softmax_output, ef_out, targets):
 #         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
 #         self.batch_size = targets.shape[0]
         
@@ -271,13 +271,13 @@ class Endpoint_ee(tf.keras.layers.Layer):
 #         return tf.multiply(self.W_aux, loss_cce)
         
 
-    def call(self, softmax_output, targets=None,   sample_weight=None):
+    def call(self, softmax_output, ef_out, targets=None,   sample_weight=None):
         if targets is not None:
-            loss = self.loss_fn(softmax_output, targets)
+            loss = self.loss_fn(softmax_output, ef_out, targets, ef_out)
             self.add_loss(loss)
             self.add_metric(loss, name='aux_loss', aggregation='mean')
         #for inference
-        return softmax_output
+        return softmax_output, ef_out
 
 
 
@@ -422,10 +422,7 @@ def resnet_v1_eembc_with_noEV(W_aux):
                     activation='softmax',
                     kernel_initializer='he_normal')(y_ee_1)
 
-    #define a endpoint layer
-    targets =  Input(shape=[num_classes])
-    ee_1  = Endpoint_ee(name='endpoint', W_aux=W_aux, num_classes=num_classes)(ee_1, targets)
-
+    
 
 
     # Final classification layer.
@@ -438,6 +435,9 @@ def resnet_v1_eembc_with_noEV(W_aux):
                     activation='softmax',
                     kernel_initializer='he_normal')(y)
 
+    #define a endpoint layer
+    targets =  Input(shape=[num_classes])
+    ee_1, outputs  = Endpoint_ee(name='endpoint', W_aux=W_aux, num_classes=num_classes)(ee_1, outputs, targets)
 
 
     # Instantiate model.
@@ -590,10 +590,7 @@ def resnet_v1_eembc_with_EV(W_aux):
                     activation='softmax',
                     kernel_initializer='he_normal')(y_ee_1)
 
-    #define a endpoint layer
-    targets =  Input(shape=[num_classes])
-    ee_1  = Endpoint_ee(name='endpoint', W_aux=W_aux, num_classes=num_classes)(ee_1, targets)
-
+    
 
     # Final classification layer.
     pool_size = int(np.amin(x.shape[1:3]))
@@ -617,6 +614,11 @@ def resnet_v1_eembc_with_EV(W_aux):
     outputs = Dense(num_classes, name='ef_out',
                     activation='softmax',
                     kernel_initializer='he_normal')(y_combined)
+
+    #define a endpoint layer
+    targets =  Input(shape=[num_classes])
+    ee_1, outputs  = Endpoint_ee(name='endpoint', W_aux=W_aux, num_classes=num_classes)(ee_1, outputs, targets)
+
 
 
 

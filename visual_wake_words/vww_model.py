@@ -305,7 +305,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
         
 
     @tf.function
-    def loss_fn(self, ee_1, targets):
+    def loss_fn(self, ee_1, ef_out, targets):
         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
         W_aux = 0.3
         P_aux = 1.0
@@ -345,12 +345,12 @@ class Endpoint_ee(tf.keras.layers.Layer):
         loss_cce =  cce(y_true_transformed_ee1, y_pred_ee1) 
         return tf.multiply(W_aux, loss_cce)
 
-    def call(self, ee_1, targets=None, sample_weight=None):
+    def call(self, ee_1, ef_out, targets=None, sample_weight=None):
         if targets is not None:
             loss = self.loss_fn(ee_1, targets)
             self.add_loss(loss)
             self.add_metric(loss, name='aux_loss', aggregation='mean')
-        return ee_1
+        return ee_1, ef_out
 
 
 # #define endpoint layer for loss calculation
@@ -362,7 +362,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
 #         self.num_classes = num_classes
 
 #     @tf.function
-#     def loss_fn(self, softmax_output, targets):
+#     def loss_fn(self, softmax_output, ef_out, targets):
 #         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
 #         self.batch_size = targets.shape[0]
         
@@ -383,13 +383,13 @@ class Endpoint_ee(tf.keras.layers.Layer):
 #         return tf.multiply(self.W_aux, loss_cce)
         
 
-#     def call(self, softmax_output, targets=None,   sample_weight=None):
+#     def call(self, softmax_output, ef_out, targets=None,   sample_weight=None):
 #         if targets is not None:
 #             loss = self.loss_fn(softmax_output, targets)
 #             self.add_loss(loss)
 #             self.add_metric(loss, name='aux_loss', aggregation='mean')
 #         #for inference
-#         return softmax_output
+#         return softmax_output, ef_out
 
 
 
@@ -703,7 +703,7 @@ def mobilenet_v1_noev(W_aux):
 
     #add endpoint layer
     targets = Input(shape=[num_classes], name='input_2')
-    ee_1 = Endpoint_ee(name='endpoint', W_aux=W_aux, num_classes=num_classes)(ee_1, targets)
+    ee_1, outputs = Endpoint_ee(name='endpoint', W_aux=W_aux, num_classes=num_classes)(ee_1, outputs, targets)
     # Instantiate model.
     model = Model(inputs=[inputs, targets], outputs=[ee_1, outputs])
     return model
@@ -1035,7 +1035,7 @@ def mobilenet_v1_ev(W_aux):
 
     #add endpoint layer
     targets = Input(shape=[num_classes], name='input_2')
-    ee_1 = Endpoint_ee(name='endpoint', W_aux=W_aux, num_classes=num_classes)(ee_1, targets)
+    ee_1, outputs = Endpoint_ee(name='endpoint', W_aux=W_aux, num_classes=num_classes)(ee_1, outputs, targets)
 
     # Instantiate model.
     model = Model(inputs=[inputs, targets], outputs=[ee_1, outputs])

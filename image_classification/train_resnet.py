@@ -218,7 +218,6 @@ class weight_transfer_callback(tf.keras.callbacks.Callback):
         self. epoch_threshold_max = (EPOCHS//5) *4
         self.no_transfer = False
 
-
     def on_train_batch_begin(self, batch, logs=None):
         if not self.no_transfer:
             for layer in self.model.layers:
@@ -314,7 +313,11 @@ if __name__ == "__main__":
     #------compile the model--------
     #get loss weights depending on model_arch
     loss_weights = get_loss_weights(model_architecture)
-    new_model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics='accuracy', 
+    if isTrecx:
+        new_model.compile(optimizer=optimizer, loss=[None,'categorical_crossentropy'], metrics='accuracy', 
+            loss_weights=loss_weights,weighted_metrics=None, run_eagerly=False)
+    else:
+        new_model.compile(optimizer=optimizer, loss='categorical_crossentropy', metrics='accuracy', 
             loss_weights=loss_weights,weighted_metrics=None, run_eagerly=False)
     
     # fits the model on batches with real-time data augmentation:

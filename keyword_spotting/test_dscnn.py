@@ -170,6 +170,22 @@ def evaluate_models(ds_test):
     print('DONE!\n')
 
     print('========================================================')
+    print('Evaluating T-Recx model with EV-assistance - orig_endpoint...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint)
+    test_metrics = model.evaluate(ds_test)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
+    print('Evaluating T-Recx model without EV-assistance - orig_endpoint...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_noev_orig_endpoint)
+    test_metrics = model.evaluate(ds_test)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
     print('Evaluating EE-fmaps concat model...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_eefmaps_concat)

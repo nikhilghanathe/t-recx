@@ -30,7 +30,7 @@ def calc_accuracy(model_name, rho, total_samples):
 		truth = int(pred['truth'])
 		arg_max_1 = int(pred['arg_max_1'])
 		isCorrect = truth==arg_max_1
-		score_max_1, score_max_2 = float(pred['score_max_1']), float(pred['score_max_2'])
+		score_max_1 =  float(pred['score_max_1'])
 		if score_max_1>rho:#if score > rho then early-exit
 			if isCorrect:
 				EE_1_correct +=1
@@ -108,20 +108,20 @@ def generate_trace(val_generator, model_name):
 			break
 		BS = test_sample.shape[0]
 		prediction = model.predict(test_sample, batch_size=BS)
-		prediction_ee, prediction_ef = prediction[0][0], prediction[1][0]	
+		prediction_ee, prediction_ef = prediction[0], prediction[1]	
 		for i in range(0, BS):#loop on batch
 		    if count==Config.total_samples:#generator loop indefintely, so add manual break when you reach dataset size
 		    	isBreak = True
 		    	break
 		    truth = np.argmax(test_label[i])
 		    prob_list = prediction_ee[i]
-		    score_max_1, _, arg_max_1, _ = collect_pred_metrics(prob_list)
+		    score_max_1, score_max_2, arg_max_1, arg_max_2 = collect_pred_metrics(prob_list)
 		    isCorrect = truth == arg_max_1
 		    prediction_dict_ee.update({str(count): {'truth':str(truth), 'prediction':str(arg_max_1),  'isCorrect': str(isCorrect), 
 	    				'score_max_1' : str(score_max_1), 'arg_max_1' : str(arg_max_1)}})
 
 		    prob_list = prediction_ef[i]
-		    score_max_1, _, arg_max_1, _ = collect_pred_metrics(prob_list)
+		    score_max_1, score_max_2, arg_max_1, arg_max_2 = collect_pred_metrics(prob_list)
 		    isCorrect = truth == arg_max_1
 		    prediction_dict_ef.update({str(count): {'truth':str(truth), 'prediction':str(arg_max_1),  'isCorrect': str(isCorrect), 
 			    'score_max_1' : str(score_max_1), 'arg_max_1' : str(arg_max_1)}})

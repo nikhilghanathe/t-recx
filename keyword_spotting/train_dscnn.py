@@ -17,15 +17,23 @@ num_classes = 12 # should probably draw this directly from the dataset.
 
 #custom callback to transfer weights from early exit to final exit before each train batch
 class weight_transf_callback(tf.keras.callbacks.Callback):
+  def __init__(self, num_epochs):
+    self. epoch_threshold_max = (num_epochs//5) *4
+    self.no_transfer = False
+
   def on_train_batch_begin(self, batch, logs=None):
-      for layer in self.model.layers:
+      if not self.no_transfer:
+        for layer in self.model.layers:
           if layer.name=='depth_conv_ee_1':
-              conv_layer = layer
+            conv_layer = layer
           if layer.name=='depth_conv_eefinal_out':
-              depthconv_eefinal_layer = layer
-      #transfer weights
-      weights = conv_layer.get_weights()
-      depthconv_eefinal_layer.set_weights(weights)
+            depthconv_eefinal_layer = layer
+        #transfer weights
+        weights = conv_layer.get_weights()
+        depthconv_eefinal_layer.set_weights(weights)
+  def on_epoch_end(self, epoch, logs=None):
+      if epoch > self.epoch_threshold_max:
+        self.no_transfer = True
 
 #custom callback to convey epoch info to SDN_loss endpoint layer
 class sdn_callback(tf.keras.callbacks.Callback):
