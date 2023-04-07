@@ -51,7 +51,7 @@ def main(argv):
     W_aux = float(argv[3])
   else:
     W_aux = 0.3#default is 0.3 from paper
-
+  print('W_aux= ',W_aux)
   # load uninitialized model
   if model_architecture=='mobnet_ev':
     model = models.mobilenet_v1_ev(W_aux)
@@ -94,7 +94,7 @@ def main(argv):
 
   # Save model
   save_trecx_model(model, model_save_name, model_architecture)
-  
+
 
 
 
