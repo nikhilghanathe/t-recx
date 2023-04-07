@@ -236,14 +236,14 @@ def calculate_scatter_points_prior(model_name, model_arch, total_samples):
 		flops_ee1, flops_ee2, flops_ee3, flops_eefinal = get_flops_prior(model_name, model_arch)
 	x_axis_accuracy, y_axis_flops =[], []
 	#vary the ee exit confidence criteria (rho from Eq1)  from 0.0 to 1.0 in steps of 0.01
-	for rho in list(np.linspace(0.01,1.0, 101)):
+	for rho in list(np.linspace(0.01,1.0, 100)):
 		if model_arch=='branchynet':
 			EE_1_cnt,EE_2_cnt, EE_final_cnt, EE_1_correct,EE_2_correct, EE_final_correct = calc_accuracy_branchynet(model_name, rho)
 			total_accuracy = ((EE_1_correct+EE_2_correct+ EE_final_correct)*100)/total_samples
 			flops_total = (flops_ee1*EE_1_cnt + flops_ee2*EE_2_cnt + flops_eefinal*EE_final_cnt )/total_samples
 		else:
 			EE_1_cnt,EE_2_cnt,EE_3_cnt, EE_final_cnt, EE_1_correct,EE_2_correct, EE_3_correct, EE_final_correct = calc_accuracy_sdn(model_name, rho)
-			total_accuracy = ((EE_1_correct+EE_2_correct+EE_2_correct+EE_final_correct)*100)/total_samples
+			total_accuracy = ((EE_1_correct+EE_2_correct+EE_3_correct+EE_final_correct)*100)/total_samples
 			flops_total = (flops_ee1*EE_1_cnt + flops_ee2*EE_2_cnt + flops_ee3*EE_3_cnt + flops_eefinal*EE_final_cnt )/total_samples
 		flops_total = flops_total/1000000 #divide by 1.0E+6 
 		x_axis_accuracy.append(total_accuracy)
@@ -305,7 +305,7 @@ def calc_accuracy_sdn(model_name, rho):
 
   for num, pred in predict_dict_ee1.items():
     truth = int(pred['truth'])
-    arg_max_1, score_max_1 = int(pred['truth']), float(pred['score_max_1'])
+    arg_max_1, score_max_1 = int(pred['arg_max_1']), float(pred['score_max_1'])
     if score_max_1>=rho:
       if truth==arg_max_1:
         EE_1_correct +=1

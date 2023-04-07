@@ -297,44 +297,99 @@ def mobilenet_v1():
 
 
 # =========================keras model for t-recx=============================
-
 #define endpoint layer for loss calculation
 class Endpoint_ee(tf.keras.layers.Layer):
     def __init__(self, name=None, W_aux=0.3, num_classes=2):
         super().__init__(name=name)
-        self.batch_size = 1
-        self.W_aux = W_aux
-        self.num_classes = num_classes
+        self.batch_size = 32
+        
 
     @tf.function
-    def loss_fn(self, softmax_output, targets):
+    def loss_fn(self, ee_1, , targets):
         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
+        W_aux = 0.3
+        P_aux = 1.0
+        num_classes=2
         self.batch_size = targets.shape[0]
+        y_true = targets
+        y_true_transformed_ee1, y_true_transformed_eefinal = [], []
+        y_pred_ee1_transformed = []
+        y_pred_eefinal_transformed = []
+        y_pred_ee1 = ee_1
         
-        y_true, y_true_transformed = [], []
         if self.batch_size==None:
-            self.batch_size=Config.BATCH_SIZE
-        #compute the one hot 'y_true' vector for loss computation
-        for i in range(0, self.batch_size):
-            arg_max_true = tf.keras.backend.argmax(targets[i])
-            arg_max_true = tf.cast(arg_max_true, dtype='int32')
-            arg_max_true = tf.reshape(arg_max_true, [1])
-            y_true.append(tf.one_hot([arg_max_true], depth=self.num_classes, on_value=1., off_value=0.0, dtype='float32'))
-        
-        #compute loss for whole batch
-        y_true_transformed = tf.reshape(y_true, [self.batch_size,self.num_classes])
-        loss_cce =  cce(y_true_transformed, softmax_output) 
-      
-        return tf.multiply(self.W_aux, loss_cce)
-        
+            self.batch_size=32
+        loss_ee1, loss_eefinal =0.0, 0.0
 
-    def call(self, softmax_output, targets=None,   sample_weight=None):
+        #for EE-1
+        for i in range(0, self.batch_size):
+            arg_max_true = tf.keras.backend.argmax(y_true[i])
+            arg_max_true = tf.cast(arg_max_true, dtype='int32')
+            arg_max_true = tf.cast(arg_max_true, dtype='int32')
+            prob_list = y_pred_ee1[i]
+            values, indices =  tf.math.top_k(prob_list, k=1)
+            
+            [score_max_1] = tf.split(values, num_or_size_splits=1)
+            [arg_max_1] = tf.split(indices, num_or_size_splits=1)
+            
+            arg_max_true = tf.reshape(arg_max_true, [1])
+            if tf.math.equal(arg_max_true, arg_max_1):
+              if True:
+                y_uncrtn = tf.one_hot([arg_max_true], depth=num_classes, on_value=1., off_value=0.0, dtype='float32')
+              else:
+                y_uncrtn = tf.one_hot([arg_max_true], depth=num_classes, on_value=P_aux, off_value=0.0, dtype='float32')
+            else:
+                y_uncrtn = tf.one_hot([arg_max_true], depth=num_classes, on_value=P_aux, off_value=0.0, dtype='float32')
+            y_true_transformed_ee1.append(y_uncrtn)
+        y_true_transformed_ee1 = tf.reshape(y_true_transformed_ee1, [self.batch_size,num_classes])
+        loss_cce =  cce(y_true_transformed_ee1, y_pred_ee1) 
+        return tf.multiply(W_aux, loss_cce)
+
+    def call(self, ee_1, targets=None, sample_weight=None):
         if targets is not None:
-            loss = self.loss_fn(softmax_output, targets)
+            loss = self.loss_fn(ee_1, targets)
             self.add_loss(loss)
             self.add_metric(loss, name='aux_loss', aggregation='mean')
-        #for inference
-        return softmax_output
+        return ee_1, ee_final
+
+
+# #define endpoint layer for loss calculation
+# class Endpoint_ee(tf.keras.layers.Layer):
+#     def __init__(self, name=None, W_aux=0.3, num_classes=2):
+#         super().__init__(name=name)
+#         self.batch_size = 1
+#         self.W_aux = W_aux
+#         self.num_classes = num_classes
+
+#     @tf.function
+#     def loss_fn(self, softmax_output, targets):
+#         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
+#         self.batch_size = targets.shape[0]
+        
+#         y_true, y_true_transformed = [], []
+#         if self.batch_size==None:
+#             self.batch_size=Config.BATCH_SIZE
+#         #compute the one hot 'y_true' vector for loss computation
+#         for i in range(0, self.batch_size):
+#             arg_max_true = tf.keras.backend.argmax(targets[i])
+#             arg_max_true = tf.cast(arg_max_true, dtype='int32')
+#             arg_max_true = tf.reshape(arg_max_true, [1])
+#             y_true.append(tf.one_hot([arg_max_true], depth=self.num_classes, on_value=1., off_value=0.0, dtype='float32'))
+        
+#         #compute loss for whole batch
+#         y_true_transformed = tf.reshape(y_true, [self.batch_size,self.num_classes])
+#         loss_cce =  cce(y_true_transformed, softmax_output) 
+      
+#         return tf.multiply(self.W_aux, loss_cce)
+        
+
+#     def call(self, softmax_output, targets=None,   sample_weight=None):
+#         if targets is not None:
+#             loss = self.loss_fn(softmax_output, targets)
+#             self.add_loss(loss)
+#             self.add_metric(loss, name='aux_loss', aggregation='mean')
+#         #for inference
+#         return softmax_output
 
 
 

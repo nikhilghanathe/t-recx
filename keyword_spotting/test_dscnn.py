@@ -131,7 +131,7 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     plt.xlabel('Total Accuracy (%)')
     plt.xlim([85,95])
     plt.ylim([2,15])
-    plt.yscale('log')
+    # plt.yscale('log')
 
     #annotate the plot with accuracy and flops of the base model
     label = f"({Config.accuracy_noEE},{Config.flops_noEE})"
@@ -201,7 +201,7 @@ if __name__ == "__main__":
     print("Done getting data")
 
     #evaluate models
-    evaluate_models(ds_test)
+    # evaluate_models(ds_test)
     # # =========Generate Fig 4b=============================
     # # generate trace_data for EV-assist and noEV-assist models
     # print('=====================================')

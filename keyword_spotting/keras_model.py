@@ -19,8 +19,53 @@ import Config
 
 
 # =========================keras model for t-recx=============================
+# class Endpoint_ee(tf.keras.layers.Layer):
+#     def __init__(self, name=None, W_aux=0.3, num_classes=12):
+#         super().__init__(name=name)
+#         self.batch_size = Config.BATCH_SIZE
 
-#define endpoint layer for loss calculation
+#     @tf.function
+#     def loss_fn(self, ee_1, targets):
+#         scce = tf.keras.losses.SparseCategoricalCrossentropy()
+#         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
+#         W_aux = 0.3
+#         P_aux = 1.0
+#         num_classes=12
+
+#         self.batch_size = targets.shape[0]
+#         y_true = targets
+#         y_true_transformed_ee1, y_true_transformed_eefinal = [], []
+#         y_pred_ee1_transformed = []
+#         y_pred_eefinal_transformed = []
+#         y_pred_ee1 = ee_1
+        
+#         if self.batch_size==None:
+#             self.batch_size=100
+#         loss_ee1, loss_eefinal =0.0, 0.0
+
+#         #for EE-1
+#         for i in range(0, self.batch_size):
+#             arg_max_true = targets[i]
+#             arg_max_true = tf.cast(arg_max_true, dtype='int32')
+#             prob_list = y_pred_ee1[i]
+#             values, indices =  tf.math.top_k(prob_list, k=3)            
+#             [score_max_1, score_max_2, score_max_3] = tf.split(values, num_or_size_splits=3)
+#             [arg_max_1, arg_max_2, arg_max_3] = tf.split(indices, num_or_size_splits=3)
+#             arg_max_true = tf.reshape(arg_max_true, [1])
+#             if tf.math.equal(arg_max_true, arg_max_1):
+#               if tf.math.less_equal(tf.math.subtract(score_max_1, score_max_2), tf.constant(0.3)):
+#                 y_uncrtn = tf.one_hot([arg_max_true], depth=num_classes, on_value=1., off_value=0.0, dtype='float32')
+#               else:
+#                 y_uncrtn = tf.one_hot([arg_max_true], depth=num_classes, on_value=P_aux, off_value=0.0, dtype='float32')
+#             else:
+#                 y_uncrtn = tf.one_hot([arg_max_true], depth=num_classes, on_value=P_aux, off_value=0.0, dtype='float32')
+#             y_true_transformed_ee1.append(y_uncrtn)
+#         y_true_transformed_ee1 = tf.reshape(y_true_transformed_ee1, [self.batch_size,num_classes])
+        
+#         loss_cce =  cce(y_true_transformed_ee1, y_pred_ee1) 
+#         return tf.multiply(W_aux, loss_cce)
+
+# #define endpoint layer for loss calculation
 class Endpoint_ee(tf.keras.layers.Layer):
     def __init__(self, name=None, W_aux=0.3, num_classes=12):
         super().__init__(name=name)
