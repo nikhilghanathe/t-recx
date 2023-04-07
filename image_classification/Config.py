@@ -7,6 +7,7 @@ model_name_noev_orig_endpoint = 'trained_models/model_without_ev_assist_orig_end
 model_baseline_ee = 'trained_models/model_baselineEE'
 model_name_sdn = 'trained_models/model_sdn'
 model_name_branchynet = 'trained_models/model_branchynet'
+model_name_base = 'trained_models/pretrainedResnet.h5'
 
 #Golden REFERENCE - This is the flops and accuracy of the base model i.e. without any t-recx techniques
 flops_noEE = (809)/32# This is the flops count when we use the pretrainedResnet model from the tinyML repo w/o any changes to the structure

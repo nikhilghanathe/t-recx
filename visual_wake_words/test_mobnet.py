@@ -60,6 +60,14 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
 
 def evaluate_models(val_generator):
     print('========================================================')
+    print('Evaluating Base model...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_base)
+    test_metrics = model.evaluate(val_generator)
+    print('Standalone accuracies are ', test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
     print('Evaluating T-Recx model with EV-assistance...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_ev)
@@ -68,9 +76,33 @@ def evaluate_models(val_generator):
     print('DONE!\n')
 
     print('========================================================')
+    print('Evaluating T-Recx model with EV-assistance_rep...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint+'_rep')
+    test_metrics = model.evaluate(val_generator)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
     print('Evaluating T-Recx model without EV-assistance...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_noev)
+    test_metrics = model.evaluate(val_generator)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
+    print('Evaluating T-Recx model with EV-assistance_point2...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_ev+'_point2')
+    test_metrics = model.evaluate(val_generator)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
+    print('Evaluating T-Recx model without EV-assistance_point2...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_noev+'_point2')
     test_metrics = model.evaluate(val_generator)
     print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
     print('DONE!\n')

@@ -11,10 +11,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pickle
 import tensorflow as tf
-import tensorflow.keras as keras
 import train_resnet as train
 import keras_model
-import sys, copy, json
+import os, sys, copy, json
 from tensorflow.keras.utils import to_categorical
 import argparse, os
 import helpers, Config
@@ -170,6 +169,14 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
 
 def evaluate_models(test_data, test_labels):
     print('========================================================')
+    print('Evaluating base model...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_base)
+    test_metrics = model.evaluate(test_data, test_labels)
+    print('Standalone accuracies are ', test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
     print('Evaluating T-Recx model with EV-assistance...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_ev)
@@ -189,7 +196,15 @@ def evaluate_models(test_data, test_labels):
     print('Evaluating T-Recx model with EV-assistance - orig_endpoint...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint)
-    test_metrics = model.evaluate(ds_test)
+    test_metrics = model.evaluate(test_data, test_labels)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+    
+    print('========================================================')
+    print('Evaluating T-Recx model with EV-assistance - orig_endpoint_rep...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint+'_rep')
+    test_metrics = model.evaluate(test_data, test_labels)
     print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
     print('DONE!\n')
 
@@ -197,7 +212,7 @@ def evaluate_models(test_data, test_labels):
     print('Evaluating T-Recx model without EV-assistance - orig_endpoint...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_noev_orig_endpoint)
-    test_metrics = model.evaluate(ds_test)
+    test_metrics = model.evaluate(test_data, test_labels)
     print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
     print('DONE!\n')
     
@@ -230,7 +245,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--get_trace', type=bool, default=False, 
         help="""If set to true, get trace data """)
-
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
     cifar_10_dir = 'cifar-10-batches-py'
     train_data, train_filenames, train_labels, test_data, test_filenames, test_labels, label_names = \
@@ -238,25 +253,25 @@ if __name__ == "__main__":
 
     
     #evaluate models
-    evaluate_models(test_data, test_labels)
+    # evaluate_models(test_data, test_labels)
     
 
-    # # =========Generate Fig 4a=============================
-    # # generate trace_data for EV-assist and noEV-assist models
-    # print('=====================================')
-    # print('Generating trace data. This may take several minutes (20-30min) to complete...')
-    # print('=====================================')
-    # helpers.generate_trace(test_data, test_labels, Config.model_name_ev)
-    # helpers.generate_trace(test_data, test_labels, Config.model_name_noev)
-    # helpers.generate_trace(test_data, test_labels, Config.model_baseline_ee)
-    # print('DONE!')
-    # #plot the benefit curve
-    # print('=====================================')
-    # print('Plotting benefit curve...The image will be saved in results/Fig4a.png')
-    # print('=====================================')
-    # plot_benefit_curve(Config.model_name_ev, Config.model_name_noev, total_samples=int(test_labels.shape[0]))
-    # print('DONE!\n\n')
-    # # ====================================================
+    # =========Generate Fig 4a=============================
+    # generate trace_data for EV-assist and noEV-assist models
+    print('=====================================')
+    print('Generating trace data. This may take several minutes (20-30min) to complete...')
+    print('=====================================')
+    helpers.generate_trace(test_data, test_labels, Config.model_name_ev)
+    helpers.generate_trace(test_data, test_labels, Config.model_name_noev)
+    helpers.generate_trace(test_data, test_labels, Config.model_baseline_ee)
+    print('DONE!')
+    #plot the benefit curve
+    print('=====================================')
+    print('Plotting benefit curve...The image will be saved in results/Fig4a.png')
+    print('=====================================')
+    plot_benefit_curve(Config.model_name_ev, Config.model_name_noev, total_samples=int(test_labels.shape[0]))
+    print('DONE!\n\n')
+    # ====================================================
 
 
 

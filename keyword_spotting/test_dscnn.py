@@ -131,7 +131,7 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     plt.xlabel('Total Accuracy (%)')
     plt.xlim([85,95])
     plt.ylim([2,15])
-    # plt.yscale('log')
+    plt.yscale('log')
 
     #annotate the plot with accuracy and flops of the base model
     label = f"({Config.accuracy_noEE},{Config.flops_noEE})"
@@ -148,11 +148,19 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     os.chdir('results')
     fig = plt.gcf()
     fig.set_size_inches((20, 15), forward=False)
-    fig.savefig('Fig7a.png', dpi=1000)
+    fig.savefig('Fig7b.png', dpi=1000)
     os.chdir('..')
 
 
 def evaluate_models(ds_test):
+    print('========================================================')
+    print('Evaluating base model...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_base)
+    test_metrics = model.evaluate(ds_test)
+    print('Standalone accuracies are ', test_metrics[-1])
+    print('DONE!\n')
+
     print('========================================================')
     print('Evaluating T-Recx model with EV-assistance...')
     print('========================================================')
@@ -173,6 +181,14 @@ def evaluate_models(ds_test):
     print('Evaluating T-Recx model with EV-assistance - orig_endpoint...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint)
+    test_metrics = model.evaluate(ds_test)
+    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+    print('DONE!\n')
+
+    print('========================================================')
+    print('Evaluating T-Recx model with EV-assistance - orig_endpoint_rep...')
+    print('========================================================')
+    model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint+'_rep')
     test_metrics = model.evaluate(ds_test)
     print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
     print('DONE!\n')
@@ -218,7 +234,7 @@ if __name__ == "__main__":
 
     #evaluate models
     evaluate_models(ds_test)
-    # # =========Generate Fig 4b=============================
+    # =========Generate Fig 4b=============================
     # # generate trace_data for EV-assist and noEV-assist models
     # print('=====================================')
     # print('Generating trace data. This may take several minutes (20-30min) to complete...')

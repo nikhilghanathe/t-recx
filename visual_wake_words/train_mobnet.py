@@ -47,12 +47,16 @@ def main(argv):
   else:
     print('Please provide model_save_name and model_architecture (choose from [mobnet_ev, mobnet_noev])  in cmdl; Usage: python train_mobnet.py <model_save_name> <model_architecture>')
 
+  if argv[3]:
+    W_aux = float(argv[3])
+  else:
+    W_aux = 0.3#default is 0.3 from paper
 
   # load uninitialized model
   if model_architecture=='mobnet_ev':
-    model = models.mobilenet_v1_ev(Config.W_aux)
+    model = models.mobilenet_v1_ev(W_aux)
   elif model_architecture=='mobnet_noev':
-    model = models.mobilenet_v1_noev(Config.W_aux)
+    model = models.mobilenet_v1_noev(W_aux)
   else:
     raise ValueError("Model architecture {:} not supported".format(model_architecture))
 
@@ -90,7 +94,7 @@ def main(argv):
 
   # Save model
   save_trecx_model(model, model_save_name, model_architecture)
-
+  
 
 
 
