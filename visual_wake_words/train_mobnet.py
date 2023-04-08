@@ -26,7 +26,7 @@ BASE_DIR = os.path.join(os.getcwd(), 'vw_coco2014_96')
 
 # custom datagen for trecx models
 def custom_generator_train(gen):
-    num_classes = 2
+    num_classes = Config.num_classes
     while True:
         (x, y) =gen.next()
         BS = x.shape[0]
@@ -99,14 +99,12 @@ def main(argv):
 
 
 ##custom callback to transfer weights from early exit to final exit before each train batch
-# this train routine trains the model in 3 steps. Allow atleast 5 epochs for finetuning after weight transfer
+# this train routine trains the model in 3 steps. weight transfer stops for last 10 epochs in the 3rd train stage i.e. for ~20% of total epochs
 class weight_transfer_callback(tf.keras.callbacks.Callback):
   def __init__(self, epochs, train_count):
         #not using 4/5 because the train is done in 3 stages. So this will esentially result in 4/5 of all train epochs        
-        # self. epoch_threshold = (epochs//3) *2 
-        # self. epoch_threshold_max = (epochs//5) *4 
+        self. epoch_threshold_max = (epochs//2) *1 
         self.train_count = train_count
-        self.isFrozen = False
         self.no_transfer = False
 
   def on_train_batch_begin(self, batch, logs=None):
@@ -122,12 +120,7 @@ class weight_transfer_callback(tf.keras.callbacks.Callback):
 
 
   def on_epoch_end(self, epoch, logs=None):
-    #hardcoding the epoch after which weight transfer stops such that atleast 5 epochs for finetuning 
-    if self.train_count==0 and epoch==15:
-      self.no_transfer = True
-    if self.train_count==1 and epoch==5:
-      self.no_transfer = True
-    if self.train_count==2 and epoch==15:
+    if epoch > self.epoch_threshold_max and self.train_count==2:
       self.no_transfer = True
 
 

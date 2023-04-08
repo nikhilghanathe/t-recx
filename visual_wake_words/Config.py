@@ -4,6 +4,7 @@ IMAGE_SIZE = 96
 epochs_0 = 20
 epochs_1 = 10
 epochs_2 = 20
+num_classes = 2
 
 
 # model names

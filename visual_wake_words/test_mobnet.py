@@ -136,6 +136,12 @@ def main(argv):
 
   print('Done getting data!\n')
 
+
+  model = tf.keras.models.load_model(argv[1])
+  test_metrics = model.evaluate(val_generator)
+  print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
+  print('DONE!\n')
+  ss
   #evaluate models
   evaluate_models(val_generator)  
 
