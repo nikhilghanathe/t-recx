@@ -653,14 +653,25 @@ def get_model(args):
 
   #loss weights vary for each architecture
   loss_weights = get_loss_weights(model_name)
-  model.compile(
+  if model_name=='ds_cnn_ev' or model_name=='ds_cnn_noev':
+    model.compile(
       #optimizer=keras.optimizers.RMSprop(learning_rate=args.learning_rate),  # Optimizer
       optimizer=keras.optimizers.Adam(learning_rate=args.learning_rate),  # Optimizer
       # Loss function to minimize
-      loss=keras.losses.SparseCategoricalCrossentropy(),
+      loss=[None, keras.losses.SparseCategoricalCrossentropy()],
       loss_weights = loss_weights,
       # List of metrics to monitor
       metrics=[keras.metrics.SparseCategoricalAccuracy()],
     )
+  else:  
+    model.compile(
+        #optimizer=keras.optimizers.RMSprop(learning_rate=args.learning_rate),  # Optimizer
+        optimizer=keras.optimizers.Adam(learning_rate=args.learning_rate),  # Optimizer
+        # Loss function to minimize
+        loss=keras.losses.SparseCategoricalCrossentropy(),
+        loss_weights = loss_weights,
+        # List of metrics to monitor
+        metrics=[keras.metrics.SparseCategoricalAccuracy()],
+      )
 
   return model
