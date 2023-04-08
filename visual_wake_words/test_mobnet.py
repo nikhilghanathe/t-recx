@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from absl import app
 
 import tensorflow as tf
+from train_mobnet import custom_generator_train
 import numpy as np
 import json
 assert tf.__version__.startswith('2')
@@ -138,7 +139,17 @@ def main(argv):
 
 
   model = tf.keras.models.load_model(argv[1])
-  test_metrics = model.evaluate(val_generator)
+  cnt=0
+  for layer in model.layers:
+    if layer.name=='ee_1_out':
+      ee_layer_num = cnt
+    if layer.name=='dense_1':
+      eefinal_layer_num = cnt
+    cnt+=1
+
+  new_model = tf.keras.Model(inputs=model.inputs, outputs=[model.layers[ee_layer_num].output, model.layers[eefinal_layer_num].output ])
+  new_model.compile(tf.keras.optimizers.Adam(), metrics='accuracy')
+  test_metrics = new_model.evaluate(val_generator)
   print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
   print('DONE!\n')
   ss
