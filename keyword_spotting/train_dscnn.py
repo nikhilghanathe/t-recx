@@ -21,12 +21,9 @@ class weight_transf_callback(tf.keras.callbacks.Callback):
     self.epoch_threshold_max = (num_epochs//5) *4
     self.no_transfer = False
 
-  def on_train_batch_begin(self, batch, logs=None):
-    #print(self.no_transfer, self.epoch_threshold_max)
-    #if not self.no_transfer:
-    if True:
+  def on_train_batch_begin(self, batch, logs=None):    
+    if not self.no_transfer:   
       for layer in self.model.layers:
-        tf.print(layer.name)
         if layer.name=='depth_conv_ee_1':
           conv_layer = layer
         if layer.name=='depth_conv_eefinal_out':
