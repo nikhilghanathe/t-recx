@@ -77,13 +77,12 @@ class Endpoint_ee(tf.keras.layers.Layer):
     def loss_fn(self, softmax_output, ef_out, targets):
         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
         self.batch_size = targets.shape[0]
-        
         y_true, y_true_transformed = [], []
         if self.batch_size==None:
             self.batch_size=Config.BATCH_SIZE
         #compute the one hot 'y_true' vector for loss computation
         for i in range(0, self.batch_size):
-            arg_max_true = tf.keras.backend.argmax(targets[i])
+            arg_max_true = targets[i]
             arg_max_true = tf.cast(arg_max_true, dtype='int32')
             arg_max_true = tf.reshape(arg_max_true, [1])
             y_true.append(tf.one_hot([arg_max_true], depth=self.num_classes, on_value=1., off_value=0.0, dtype='float32'))
@@ -91,7 +90,7 @@ class Endpoint_ee(tf.keras.layers.Layer):
         #compute loss for whole batch
         y_true_transformed = tf.reshape(y_true, [self.batch_size,self.num_classes])
         loss_cce =  cce(y_true_transformed, softmax_output) 
-      
+        tf.print()
         return tf.multiply(self.W_aux, loss_cce)
         
 
