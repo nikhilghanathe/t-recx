@@ -190,7 +190,7 @@ def get_model(args):
     x = Conv2D(filters, (1,1), padding='same', kernel_regularizer=regularizer)(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    #add EE
+    #add EE here
     ee1_fmaps = x
     
     # Third layer of separable depthwise conv2d
@@ -293,7 +293,7 @@ def get_model(args):
     x = Activation('relu')(x)
     #add EE
     ee1_fmaps = x
-    
+
     # Third layer of separable depthwise conv2d
     x = DepthwiseConv2D(depth_multiplier=1, kernel_size=(3,3), padding='same', kernel_regularizer=regularizer)(x)
     x = BatchNormalization()(x)
