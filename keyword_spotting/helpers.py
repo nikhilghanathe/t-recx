@@ -251,7 +251,7 @@ def calculate_scatter_points_prior(model_name, model_arch, total_samples):
 	return x_axis_accuracy, y_axis_flops
 
 
-#benefit curve
+#calc accuracy of model according to Eq 1 from paper, given rho 
 def calc_accuracy_branchynet(model_name, rho):
   #read trace data of model
   with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee1.json', 'r') as fp:
@@ -288,7 +288,7 @@ def calc_accuracy_branchynet(model_name, rho):
 
 
 
-#benefit curve
+#calc accuracy of model according to Eq 1 from paper, given rho 
 def calc_accuracy_sdn(model_name, rho):
   #read trace data of model
   with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee1.json', 'r') as fp:

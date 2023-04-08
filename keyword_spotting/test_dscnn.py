@@ -36,6 +36,7 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     
 
     #plot benefit curve
+    fig, ax = plt.subplots()
     plt.scatter(Config.accuracy_noEE, Config.flops_noEE, label='no EE', color = 'red')
     plt.vlines(Config.accuracy_noEE, 0,Config.flops_noEE, linestyles='dashed', color='orange')
     plt.hlines(Config.flops_noEE, 0,Config.accuracy_noEE, linestyles='dashed', color='orange')
@@ -79,6 +80,7 @@ def plot_benefit_curve_ev_effectiveness(model_name_ev, model_name_noev, model_na
     
 
     #plot benefit curve
+    fig, ax = plt.subplots()
     plt.scatter(Config.accuracy_noEE, Config.flops_noEE, label='no EE', color = 'red')
     plt.vlines(Config.accuracy_noEE, 0,Config.flops_noEE, linestyles='dashed', color='orange')
     plt.hlines(Config.flops_noEE, 0,Config.accuracy_noEE, linestyles='dashed', color='orange')
@@ -120,6 +122,7 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     x_axis_accuracy_branchynet, y_axis_flops_branchynet = helpers.calculate_scatter_points_prior(model_name_branchynet, 'branchynet', total_samples)
 
     #plot benefit curve
+    fig, ax = plt.subplots()
     plt.scatter(Config.accuracy_noEE, Config.flops_noEE, label='no EE', color = 'red')
     plt.vlines(Config.accuracy_noEE, 0,Config.flops_noEE, linestyles='dashed', color='orange')
     plt.hlines(Config.flops_noEE, 0,Config.accuracy_noEE, linestyles='dashed', color='orange')
@@ -178,30 +181,6 @@ def evaluate_models(ds_test):
     print('DONE!\n')
 
     print('========================================================')
-    print('Evaluating T-Recx model with EV-assistance - orig_endpoint...')
-    print('========================================================')
-    model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint)
-    test_metrics = model.evaluate(ds_test)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    print('DONE!\n')
-
-    print('========================================================')
-    print('Evaluating T-Recx model with EV-assistance - orig_endpoint_rep...')
-    print('========================================================')
-    model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint+'_rep')
-    test_metrics = model.evaluate(ds_test)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    print('DONE!\n')
-
-    print('========================================================')
-    print('Evaluating T-Recx model without EV-assistance - orig_endpoint...')
-    print('========================================================')
-    model = tf.keras.models.load_model(Config.model_name_noev_orig_endpoint)
-    test_metrics = model.evaluate(ds_test)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    print('DONE!\n')
-
-    print('========================================================')
     print('Evaluating EE-fmaps concat model...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_eefmaps_concat)
@@ -231,44 +210,39 @@ if __name__ == "__main__":
     Flags, unparsed = kws_util.parse_command()
     ds_train, ds_test, ds_val = kws_data.get_training_data(Flags)
     print("Done getting data")
-
-    model = tf.keras.models.load_model(Flags.model_init_path)
-    test_metrics = model.evaluate(ds_test)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    ss
-
+    
     #evaluate models
     evaluate_models(ds_test)
     # =========Generate Fig 4b=============================
-    # # generate trace_data for EV-assist and noEV-assist models
-    # print('=====================================')
-    # print('Generating trace data. This may take several minutes (20-30min) to complete...')
-    # print('=====================================')
-    # helpers.generate_trace(ds_test, Config.model_name_ev)
-    # helpers.generate_trace(ds_test, Config.model_name_noev)
-    # helpers.generate_trace(ds_test, Config.model_name_eefmaps_concat)
-    # print('DONE!')
-    # #plot the benefit curve
-    # print('=====================================')
-    # print('Plotting benefit curve...The image will be saved in results/Fig4b.png')
-    # print('=====================================')
-    # plot_benefit_curve(Config.model_name_ev, Config.model_name_noev, total_samples=Config.total_samples)
-    # print('DONE!\n\n')
-    # # ====================================================
+    # generate trace_data for EV-assist and noEV-assist models
+    print('=====================================')
+    print('Generating trace data. This may take several minutes (10-15min) to complete...')
+    print('=====================================')
+    helpers.generate_trace(ds_test, Config.model_name_ev)
+    helpers.generate_trace(ds_test, Config.model_name_noev)
+    helpers.generate_trace(ds_test, Config.model_name_eefmaps_concat)
+    print('DONE!')
+    #plot the benefit curve
+    print('=====================================')
+    print('Plotting benefit curve...The image will be saved in results/Fig4b.png')
+    print('=====================================')
+    plot_benefit_curve(Config.model_name_ev, Config.model_name_noev, total_samples=Config.total_samples)
+    print('DONE!\n\n')
+    # ====================================================
 
 
-    # #=========Generate Fig 6===========================
-    # print('=====================================')
-    # print('Plotting benefit curve to compare EV-assist effectiveness ...The image will be saved in results/Fig6.png')
-    # print('=====================================')
-    # plot_benefit_curve_ev_effectiveness(Config.model_name_ev, Config.model_name_noev, Config.model_name_eefmaps_concat, total_samples=Config.total_samples)
-    # print('DONE!\n\n')
-    # # ====================================================
+    #=========Generate Fig 6===========================
+    print('=====================================')
+    print('Plotting benefit curve to compare EV-assist effectiveness ...The image will be saved in results/Fig6.png')
+    print('=====================================')
+    plot_benefit_curve_ev_effectiveness(Config.model_name_ev, Config.model_name_noev, Config.model_name_eefmaps_concat, total_samples=Config.total_samples)
+    print('DONE!\n\n')
+    # ====================================================
 
 
     #=========Generate Fig 7b===========================
     print('\n=============================================================')
-    print('Generating trace data... This may take several minutes (15-20min) to complete...')
+    print('Generating trace data... This may take several minutes (10-15min) to complete...')
     print('===============================================================\n')
     helpers.generate_trace(ds_test, Config.model_name_ev)
     helpers.generate_trace_prior(ds_test, Config.model_name_sdn, model_arch='sdn')

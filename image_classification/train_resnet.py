@@ -207,19 +207,6 @@ def custom_generator_val(gen):
     while True:
         (x, y) =gen.next()
         yield [x,y], y
-# def custom_generator_val(gen):
-#     while True:
-#         (x, y) =gen.next()
-#         curr_BS = y.shape[0]
-#         if curr_BS !=BS:#if not equal to batch size, append dummy tensors
-#             x_0, x_1 = x, y
-#             dummy_x_tensor = tf.constant(0, dtype='float32', shape=[BS-curr_BS, 32,32,3])
-#             dummy_y_tensor =  tf.zeros(shape=[BS-curr_BS, 10], dtype='float32')
-#             x_0 = tf.concat([x_0, dummy_x_tensor], axis=0)
-#             x_1= tf.concat([x_1, dummy_y_tensor], axis=0)
-#             yield (x_0, x_1), x_1
-#         else:
-#             yield [x,y], y
 
 
 #-----------------Callbacks----------------------------------------------------------------
@@ -338,7 +325,6 @@ if __name__ == "__main__":
     print('----------------------------------------------------')
 
     #custom datagen
-    # train_gen = datagen.flow( train_data, train_labels,  batch_size=BS)
     train_gen = custom_generator_val(datagen.flow( train_data, train_labels,  batch_size=BS))
     if isTrecx:
         if isEV:#use weight transfer callback
@@ -360,7 +346,5 @@ if __name__ == "__main__":
     save_trecx_model(new_model, model_save_name, model_architecture)
     
     print('DONE!')
-
-    new_model.evaluate(x=[test_data,test_labels], y=test_labels)
 
 

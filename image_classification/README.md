@@ -29,7 +29,9 @@ To train the models,
 
 ## Description
 The python format CIFAR10 dataset batches are stored in the __/cifar-10-batches-py__ folder.
+
 The pretrained models can be found in `trained_models/`
+
 The benefit curve presented in the paper are generated and saved to `results/` 
 
 Running `python test_resnet.py` generates benefit curve plots and stores them in `results/`

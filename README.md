@@ -27,21 +27,24 @@ We evaluate three tinyML tasks from the MLPerf tiny benchmark suite.
 >* Visual Wake Words on Visual Wake word dataset with MobilenetV1
 
 **Installation**
+
 Install a package manger like [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
 Create a conda environment and install all software dependencies as follows.
-
-`conda create -n trecx python=3.7`
-`conda activate trecx`
-`bash install_conda_packages.sh`
-`pip install -r requirements.txt`
-
+```bash
+conda create -n trecx python=3.7
+conda activate trecx
+bash install_conda_packages.sh
+pip install -r requirements.txt
+```
 **Usage**
+
 The repository contains three directories: `image_classification/`, `keyword_spotting/`, `visual_wake_words/`. These directories correspond  to evaluation of 1) Resnet-8 on CIFAR-10, 2) DSCNN on Speech Commands and 3) MobilenetV1 on Visual wake words datasets respectively. 
 The scripts for downloading datasets, preprocessing, training and testing have all been automated, and are included in each directory.  See README.md in each directory for further instructions.
 
 The repository also contains pretrained models. As an alternative to several hours of training, the results presented in this work can   be verified by running the test script included in each directory. Details on running the test scripts can be found in the corresponding README.md files.
 
 **GPU Support**
+
 For GPU support, you may need to customize your CUDA installation based on the version of tensorflow and CUDA drivers installed.  See [https://www.tensorflow.org/install/source#gpu](https://www.tensorflow.org/install/source#gpu) for more information.
 
   

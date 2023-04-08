@@ -30,6 +30,7 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     
 
     #plot benefit curve
+    fig, ax = plt.subplots()
     plt.scatter(Config.accuracy_noEE, Config.flops_noEE, label='no EE', color = 'red')
     plt.vlines(Config.accuracy_noEE, 0,Config.flops_noEE, linestyles='dashed', color='orange')
     plt.hlines(Config.flops_noEE, 0,Config.accuracy_noEE, linestyles='dashed', color='orange')
@@ -134,6 +135,7 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     x_axis_accuracy_branchynet, y_axis_flops_branchynet = helpers.calculate_scatter_points_prior(model_name_branchynet, total_samples)
 
     #plot benefit curve
+    fig, ax = plt.subplots()
     plt.scatter(Config.accuracy_noEE, Config.flops_noEE, label='no EE', color = 'red')
     plt.vlines(Config.accuracy_noEE, 0,Config.flops_noEE, linestyles='dashed', color='orange')
     plt.hlines(Config.flops_noEE, 0,Config.accuracy_noEE, linestyles='dashed', color='orange')
@@ -193,30 +195,6 @@ def evaluate_models(test_data, test_labels):
     print('DONE!\n')
 
     print('========================================================')
-    print('Evaluating T-Recx model with EV-assistance - orig_endpoint...')
-    print('========================================================')
-    model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint)
-    test_metrics = model.evaluate(test_data, test_labels)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    print('DONE!\n')
-    
-    print('========================================================')
-    print('Evaluating T-Recx model with EV-assistance - orig_endpoint_rep...')
-    print('========================================================')
-    model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint+'_rep')
-    test_metrics = model.evaluate(test_data, test_labels)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    print('DONE!\n')
-
-    print('========================================================')
-    print('Evaluating T-Recx model without EV-assistance - orig_endpoint...')
-    print('========================================================')
-    model = tf.keras.models.load_model(Config.model_name_noev_orig_endpoint)
-    test_metrics = model.evaluate(test_data, test_labels)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    print('DONE!\n')
-    
-    print('========================================================')
     print('Evaluating base model with baselineEE...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_baseline_ee)
@@ -252,8 +230,8 @@ if __name__ == "__main__":
         train.load_cifar_data(cifar_10_dir)
 
     
-    #evaluate models
-    # evaluate_models(test_data, test_labels)
+    #evaluate models and report accuracies
+    evaluate_models(test_data, test_labels)
     
 
     # =========Generate Fig 4a=============================
@@ -293,10 +271,10 @@ if __name__ == "__main__":
     # ====================================================
     
 
-    #=========Generate Fig 5===========================
-    print('=====================================')
-    print('Plotting Violin plot...The image will be saved in results/Fig5.png')
-    print('=====================================')
-    plot_violin_plot(Config.model_name_noev, Config.model_baseline_ee)
-    print('DONE!\n\n')
-    # ====================================================
+    # #=========Generate Fig 5===========================
+    # print('=====================================')
+    # print('Plotting Violin plot...The image will be saved in results/Fig5.png')
+    # print('=====================================')
+    # plot_violin_plot(Config.model_name_ev, Config.model_baseline_ee)
+    # print('DONE!\n\n')
+    # # ====================================================

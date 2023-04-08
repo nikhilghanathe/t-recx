@@ -1,10 +1,8 @@
 '''
-MLCommons
-group: TinyMLPerf (https://github.com/mlcommons/tiny)
+Project: t-recx
+Subproject: Image classification on cifar10
+desc: Keras models for T-recx evaluations
 
-image classification on cifar10
-
-keras_model.py: CIFAR10_ResNetv1 from eembc
 '''
 
 import numpy as np
@@ -194,52 +192,6 @@ def resnet_v1_eembc():
 
 
 # =========================keras model for t-recx=============================
-#define endpoint layer for loss calculation
-# class Endpoint_ee(tf.keras.layers.Layer):
-#     def __init__(self, name=None, W_aux=0.5, num_classes=10):
-#         super().__init__(name=name)
-#         self.batch_size = 32
-
-#     @tf.function
-#     def loss_fn(self, ee_1, ef_out, targets):
-#         scce = tf.keras.losses.SparseCategoricalCrossentropy()
-#         cce = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
-#         W_aux = 0.5
-#         P_aux = 1.0
-#         num_classes=10
-
-#         self.batch_size = targets.shape[0]
-#         y_true = targets
-#         y_true_transformed_ee1 = []
-#         y_pred_ee1 = ee_1
-        
-#         if self.batch_size==None:
-#             self.batch_size=32
-#         loss_ee1, loss_eefinal =0.0, 0.0
-
-#         #for EE-1
-#         for i in range(0, self.batch_size):
-#             arg_max_true = tf.keras.backend.argmax(targets[i])
-#             arg_max_true = tf.cast(arg_max_true, dtype='int32')
-#             prob_list = y_pred_ee1[i]
-#             values, indices =  tf.math.top_k(prob_list, k=3)            
-#             [score_max_1, score_max_2, score_max_3] = tf.split(values, num_or_size_splits=3)
-#             [arg_max_1, arg_max_2, arg_max_3] = tf.split(indices, num_or_size_splits=3)
-#             arg_max_true = tf.reshape(arg_max_true, [1])
-#             if tf.math.equal(arg_max_true, arg_max_1):
-#               if tf.math.less_equal(tf.math.subtract(score_max_1, score_max_2), tf.constant(0.3)):
-#                 y_uncrtn = tf.one_hot([arg_max_true], depth=num_classes, on_value=1., off_value=0.0, dtype='float32')
-#               else:
-#                 y_uncrtn = tf.one_hot([arg_max_true], depth=num_classes, on_value=P_aux, off_value=0.0, dtype='float32')
-#             else:
-#                 y_uncrtn = tf.one_hot([arg_max_true], depth=num_classes, on_value=P_aux, off_value=0.0, dtype='float32')
-#             y_true_transformed_ee1.append(y_uncrtn)
-#         y_true_transformed_ee1 = tf.reshape(y_true_transformed_ee1, [self.batch_size,num_classes])
-        
-#         loss_cce =  cce(y_true_transformed_ee1, y_pred_ee1) 
-#         return tf.multiply(W_aux, loss_cce)
-
-
 # #define endpoint layer for loss calculation
 class Endpoint_ee(tf.keras.layers.Layer):
     def __init__(self, name=None, W_aux=0.5, num_classes=10):
@@ -806,7 +758,6 @@ def resnet_v1_branchynet():
 class SDN_loss(tf.keras.layers.Layer):
   def __init__(self, name=None, max_tau=0.3):
     super().__init__(name=name)
-    self.batch_size = 32
     self.tau = 0.01
     self.epoch = 0 #set on epoch_begin
     self.epochs = 500 #set on train_begin
@@ -1023,7 +974,6 @@ def resnet_v1_baselineEE():
     ee_1_fmaps =x
     
 
-
     # Second stack
 
     # Weight layers
@@ -1092,7 +1042,7 @@ def resnet_v1_baselineEE():
     x = Activation('relu')(x)
 
 
-    #First EE without uncertain class
+    #Add baseline EE 
     # pool_size = int(np.amin(x.shape[1:3]))
     pool_size = (4,4)
     x_ee_1 = AveragePooling2D(pool_size=pool_size)(ee_1_fmaps)
@@ -1101,12 +1051,6 @@ def resnet_v1_baselineEE():
                     activation='softmax',
                     kernel_initializer='he_normal', name='ee_out')(y_ee_1)
     
-    # pool_size = (4,4)
-    # x_ee_2 = AveragePooling2D(pool_size=pool_size)(ee_2_fmaps)
-    # y_ee_2 = Flatten()(x_ee_2)
-    # ee_2 = Dense(num_classes,
-    #                 activation='softmax',
-    #                 kernel_initializer='he_normal')(y_ee_2)
     
     # Final classification layer.
     pool_size = int(np.amin(x.shape[1:3]))

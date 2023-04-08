@@ -62,12 +62,6 @@ if __name__ == '__main__':
   print("Done getting data")
 
 
-  #append ffmpeg path to system path
-  # pwd = os.getcwd()
-  # sys.path.append(pwd+'/ffmpeg')
-  # print(sys.path)
-  
-
   # this is taken from the dataset web page.
   # there should be a better way than hard-coding this
   train_shuffle_buffer_size = 85511
@@ -110,4 +104,4 @@ if __name__ == '__main__':
   #   test_scores = model.evaluate(ds_test)
   #   print("Test loss:", test_scores[0])
   #   print("Test accuracy:", test_scores[1])
-  model.evaluate(ds_test)
+  

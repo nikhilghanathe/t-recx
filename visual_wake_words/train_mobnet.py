@@ -47,7 +47,7 @@ def main(argv):
   else:
     print('Please provide model_save_name and model_architecture (choose from [mobnet_ev, mobnet_noev])  in cmdl; Usage: python train_mobnet.py <model_save_name> <model_architecture>')
 
-  if argv[3]:
+  if len(argv)>=4:
     W_aux = float(argv[3])
   else:
     W_aux = 0.3#default is 0.3 from paper
@@ -111,24 +111,24 @@ class weight_transfer_callback(tf.keras.callbacks.Callback):
 
   def on_train_batch_begin(self, batch, logs=None):
     if not self.no_transfer:
-        for layer in self.model.layers:
-            if layer.name=='depth_conv_ee_1':
-                dw_ee_conv_layer = layer
-            if layer.name=='depth_conv_eefinal_out':
-                depthconv_eefinal_layer = layer
+      for layer in self.model.layers:
+        if layer.name=='depth_conv_ee_1':
+          dw_ee_conv_layer = layer
+        if layer.name=='depth_conv_eefinal_out':
+          depthconv_eefinal_layer = layer
 
-        weights = dw_ee_conv_layer.get_weights()
-        depthconv_eefinal_layer.set_weights(weights)
+      weights = dw_ee_conv_layer.get_weights()
+      depthconv_eefinal_layer.set_weights(weights)
 
 
-    def on_epoch_end(self, epoch, logs=None):
-      #hardcoding the epoch after which weight transfer stops such that atleast 5 epochs for finetuning 
-      if self.train_count==0 and epoch==15:
-        self.no_transfer = True
-      if self.train_count==1 and epoch==5:
-        self.no_transfer = True
-      if self.train_count==2 and epoch==15:
-        self.no_transfer = True
+  def on_epoch_end(self, epoch, logs=None):
+    #hardcoding the epoch after which weight transfer stops such that atleast 5 epochs for finetuning 
+    if self.train_count==0 and epoch==15:
+      self.no_transfer = True
+    if self.train_count==1 and epoch==5:
+      self.no_transfer = True
+    if self.train_count==2 and epoch==15:
+      self.no_transfer = True
 
 
 def train_epochs(model, train_generator, val_generator, epoch_count,
@@ -136,7 +136,7 @@ def train_epochs(model, train_generator, val_generator, epoch_count,
 
   model.compile(
       optimizer=tf.keras.optimizers.Adam(learning_rate),
-      loss='categorical_crossentropy',
+      loss=[None, 'categorical_crossentropy'],
       metrics=['accuracy'], loss_weights=None, run_eagerly=False)
 
   if model_architecture=='mobnet_ev':
