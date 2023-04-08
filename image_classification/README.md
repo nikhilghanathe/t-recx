@@ -1,34 +1,35 @@
-# MLPerf Tiny image classification reference model
 
-This is the MLPerf Tiny image classification reference model.
+# Image Classification with Resnet-8 on CIFAR-10
 
 A ResNet8 model is trained on the CIFAR10 dataset available at:
 https://www.cs.toronto.edu/~kriz/cifar.html
 
 Model: ResNet8
-Dataset: Cifar10
+Dataset: CIFAR-10
 
-## Quick start
+## Usage
 
 Run the following commands to go through the whole training and validation process
 
 ``` Bash
-# Prepare Python venv (Python 3.6+ and pip>20 required)
-./prepare_training_env.sh
+# Download dataset
+./download_dataset.sh (takes a few minutes)
 
-# Download training, train model, test the model
-./download_cifar10_train_resnet.sh
+# Train Resnet-8 models (takes several hours)
+./train_resnet.sh 
 
-# Convert the model to TFlite, and test conversion quality
-./convert_to_tflite.sh
+# Testing (30-40 minutes)
+python test_resnet.py
 ```
 
 ## Description
 The python format CIFAR10 dataset batches are stored in the __/cifar-10-batches-py__ folder.
+The pretrained models can be found in `trained_models/`
+The benefit curve presented in the paper are generated and saved to `results/` 
+Each model trains for around 4-5 hours with a GPU. 
 
-The performance evaluation test set is made of 200 samples randomly chosen from the CIFAR10.
-These samples are stored in the __/perf_samples__ folder.  
-Associated to the performance samples is the __y_labels.csv__ ground truth file: the first item of each row is the name of the sample, the second item of each row is the total number of classes (10) and the third item is the target class.
+Running `./train_resnet.sh` will train Resnet-8 model with 1) Early-view (EV) assistance, 2) without EV-assistance, 3) with [SDN](https://arxiv.org/abs/1810.07052) techniques and 4) with [Branchynet](https://arxiv.org/abs/1709.01686) techniques
 
-Please, use this performance evaluation test set to evaluate performances of the system to be tested.
+Running `python test_resnet.py` generates benefit curve plots and stores them in `results/`
+
 
