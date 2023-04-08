@@ -136,7 +136,7 @@ def train_epochs(model, train_generator, val_generator, epoch_count,
 
   model.compile(
       optimizer=tf.keras.optimizers.Adam(learning_rate),
-      loss=[None, 'categorical_crossentropy'],
+      loss='categorical_crossentropy',
       metrics=['accuracy'], loss_weights=None, run_eagerly=False)
 
   if model_architecture=='mobnet_ev':
