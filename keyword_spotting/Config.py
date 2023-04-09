@@ -4,7 +4,8 @@ BATCH_SIZE=100
 
 
 # model names
-model_name_ev = 'trained_models/model_with_ev_assist'
+# model_name_ev = 'trained_models/model_with_ev_assist'
+model_name_ev = 'trained_models/model_with_ev_assist_ee_at_half_point3'
 model_name_noev = 'trained_models/model_without_ev_assist'
 model_name_ev_orig_endpoint = 'trained_models/model_with_ev_assist_orig_endpoint'
 model_name_noev_orig_endpoint = 'trained_models/model_without_ev_assist_orig_endpoint'

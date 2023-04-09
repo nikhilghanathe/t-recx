@@ -15,7 +15,7 @@ Run the following commands to go through the whole training and validation proce
 # Download dataset
 ./download_dataset.sh (takes a few minutes)
 
-# Testing (30-40 minutes)
+# Reproduce results (30-40 minutes)
 python test_resnet.py
 
 ```

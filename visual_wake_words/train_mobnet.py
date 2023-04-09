@@ -35,7 +35,7 @@ def custom_generator_train(gen):
           dummy_x_tensor = tf.constant(0, dtype='float32', shape=[Config.BATCH_SIZE-BS, 96,96,3])
           dummy_y_tensor =  tf.zeros(shape=[Config.BATCH_SIZE-BS,2],  dtype='float32')
           x_0 = tf.concat([x_0, dummy_x_tensor], axis=0)
-          x_1= tf.concat([x_1, dummy_y_tensor], axis=0)
+          x_1 = tf.concat([x_1, dummy_y_tensor], axis=0)
           yield (x_0, x_1), x_1
         else:
           yield (x, y), y
@@ -47,11 +47,15 @@ def main(argv):
   else:
     print('Please provide model_save_name and model_architecture (choose from [mobnet_ev, mobnet_noev])  in cmdl; Usage: python train_mobnet.py <model_save_name> <model_architecture>')
 
-  if len(argv)>=4:
-    W_aux = float(argv[3])
-  else:
-    W_aux = 0.3#default is 0.3 from paper
+  if len(argv)>=4: W_aux = float(argv[3])
+  else: W_aux = 0.3#default is 0.3 from paper
+
+  if len(argv)>=5: 
+    if argv[4]=='lossNone': isLossEE = False
+    else: isLossEE = True
+
   print('W_aux= ',W_aux)
+  print('isLossEE= ',isLossEE)
   # load uninitialized model
   if model_architecture=='mobnet_ev':
     model = models.mobilenet_v1_ev(W_aux)
@@ -88,9 +92,9 @@ def main(argv):
   print(train_generator.class_indices)
 
   # train model in 3 iterations
-  model = train_epochs(model, train_generator, val_generator, Config.epochs_0, 0.001, model_save_name, 0, model_architecture)
-  model = train_epochs(model, train_generator, val_generator, Config.epochs_1, 0.0005, model_save_name, 1, model_architecture)
-  model = train_epochs(model, train_generator, val_generator, Config.epochs_2, 0.00025, model_save_name, 2, model_architecture)
+  model = train_epochs(model, train_generator, val_generator, Config.epochs_0, 0.001, model_save_name, 0, model_architecture, isLossEE)
+  model = train_epochs(model, train_generator, val_generator, Config.epochs_1, 0.0005, model_save_name, 1, model_architecture, isLossEE)
+  model = train_epochs(model, train_generator, val_generator, Config.epochs_2, 0.00025, model_save_name, 2, model_architecture, isLossEE)
 
   # Save model
   save_trecx_model(model, model_save_name, model_architecture)
@@ -125,12 +129,18 @@ class weight_transfer_callback(tf.keras.callbacks.Callback):
 
 
 def train_epochs(model, train_generator, val_generator, epoch_count,
-                 learning_rate, model_name, train_count, model_architecture):
+                 learning_rate, model_name, train_count, model_architecture, isLossEE):
+  if isLossEE:
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate),
+        loss='categorical_crossentropy',
+        metrics=['accuracy'], loss_weights=None, run_eagerly=False)
+  else:
+    model.compile(
+        optimizer=tf.keras.optimizers.Adam(learning_rate),
+        loss=[None, 'categorical_crossentropy'],
+        metrics=['accuracy'], loss_weights=None, run_eagerly=False)
 
-  model.compile(
-      optimizer=tf.keras.optimizers.Adam(learning_rate),
-      loss='categorical_crossentropy',
-      metrics=['accuracy'], loss_weights=None, run_eagerly=False)
 
   if model_architecture=='mobnet_ev':
     history_fine = model.fit(

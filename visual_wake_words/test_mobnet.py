@@ -150,6 +150,7 @@ def main(argv):
   new_model = tf.keras.Model(inputs=model.inputs, outputs=[model.layers[ee_layer_num].output, model.layers[eefinal_layer_num].output ])
   new_model.compile(tf.keras.optimizers.Adam(), metrics='accuracy')
   test_metrics = new_model.evaluate(val_generator)
+  test_metrics = model.evaluate(val_generator)
   print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
   print('DONE!\n')
   ss
