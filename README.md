@@ -29,6 +29,7 @@ We evaluate three tinyML tasks from the MLPerf tiny benchmark suite.
 **Installation**
 
 Install a package manger like [Miniconda](https://docs.conda.io/en/latest/miniconda.html)
+
 Create a conda environment and install all software dependencies as follows.
 ```bash
 conda create -n trecx python=3.7
