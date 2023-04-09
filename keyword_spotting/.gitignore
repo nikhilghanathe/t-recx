@@ -1,0 +1,14 @@
+*~
+data/
+results/
+trace_data/
+plots/
+*.dat
+tmp*
+*.txt
+tmp/
+__pycache__/
+.DS_Store
+Untitled*
+aww_model.tflite
+.ipynb_checkpoints/
