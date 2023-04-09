@@ -13,6 +13,6 @@ model_name_noev = 'trained_models/model_without_ev_assist'
 model_name_base = 'trained_models/vww_96.h5'
 #Golden REFERENCE - This is the flops and accuracy of the base model i.e. without any t-recx techniques
 flops_noEE = 15.69# This is the flops count when we use the pretrainedResnet model from the tinyML repo w/o any changes to the structure
-accuracy_noEE = 85.63
+accuracy_noEE = 85.81
 
 

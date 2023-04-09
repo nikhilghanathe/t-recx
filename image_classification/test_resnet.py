@@ -8,6 +8,7 @@ desc: Loads data, generates trace of all predictions and stores in a json file.
 '''
 
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import pickle
 import tensorflow as tf
@@ -17,8 +18,6 @@ import os, sys, copy, json
 from tensorflow.keras.utils import to_categorical
 import argparse, os
 import helpers, Config
-
-
 
 # ===============================================================================
 #plot the benefit curve with and without weight transfer (Fig 4a from the paper)
@@ -55,9 +54,9 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     if not os.path.exists('results'):
         os.makedirs('results')
     os.chdir('results')
-    fig = plt.gcf()
-    fig.set_size_inches((20, 15), forward=False)
-    fig.savefig('Fig4a.png', dpi=1000)
+    # fig = plt.gcf()
+    # fig.set_size_inches((20, 15), forward=False)
+    plt.savefig('Fig4a.png', dpi=1000)
     os.chdir('..')
     # plt.show()
 
@@ -70,55 +69,6 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     #     fp.write('accuracy\tflops\n')
     #     for i in range(len(x_axis_accuracy_no_ev)):
     #         fp.write(str(x_axis_accuracy_no_ev[i])+'\t'+str(y_axis_flops_no_ev[i])+'\n')
-
-
-
-
-
-#Plot the violin plot of Fig 5
-# Violin Plot of medium confidence predictions (0.65 < 𝑚𝑎𝑥 (𝑠𝑜𝑓𝑡𝑚𝑎𝑥𝑠𝑐𝑜𝑟𝑒𝑠) ≤ 0.9)
-def plot_violin_plot(model_name_ev, model_name_baseline):
-    #read model trace data of early-exit
-    with open('trace_data/'+'trace_data_'+model_name_ev[15:]+'_ee.json', 'r') as fp:
-        predict_dict_trecx = json.load(fp)
-    #read model trace data without t-recx early-exit block (baseline)
-    with open('trace_data/'+'trace_data_'+model_name_baseline[15:]+'_ee.json', 'r') as fp:
-        predict_dict_baseline = json.load(fp)
-
-    #record the confidence of all prediction in the medium confidence region
-    confidence_data_trecx = []
-    for num, pred in predict_dict_trecx.items():
-        score = float(pred['score_max_1'])
-        if score <0.9 and score>=0.65:
-            confidence_data_trecx.append(score)
-    confidence_data_baseline = []
-    for num, pred in predict_dict_baseline.items():
-        score = float(pred['score_max_1'])
-        if score <0.9 and score>=0.65:
-            confidence_data_baseline.append(score)
-
-
-    #plot the confidence
-    fig, ax = plt.subplots()
-    ax.set_xticks([1,2])
-    ax.set_yticks([0.8, 0.85, 0.9, 0.95, 1.0])
-    xticklabels=['Baseline EE', 'T-RECX EE']
-    ax.set_xticklabels(xticklabels, fontsize=36)
-    yticklabels=[0.8, 0.85, 0.9, 0.95, 1.0]
-    ax.set_yticklabels(yticklabels, fontsize=28)
-    data = [confidence_data_baseline, confidence_data_trecx]
-    ax.violinplot( data,  showmeans=False, showmedians=True)
-    ax.yaxis.grid(True)
-    plt.yscale('linear')
-    plt.ylabel('Confidence', fontsize=42)
-    # plt.legend()
-    # plt.show()
-    os.chdir('results')
-    fig = plt.gcf()
-    fig.set_size_inches((20, 15), forward=False)
-    fig.savefig('Fig5.png', dpi=1000)
-    os.chdir('..')
-
 
 
 
@@ -162,19 +112,17 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     if not os.path.exists('results'):
         os.makedirs('results')
     os.chdir('results')
-    fig = plt.gcf()
-    fig.set_size_inches((20, 15), forward=False)
-    fig.savefig('Fig7a.png', dpi=1000)
+    plt.savefig('Fig7a.png', dpi=1000)
     os.chdir('..')
 
 
 
-def evaluate_models(test_data, test_labels):
+def evaluate_models(test_gen):
     print('========================================================')
     print('Evaluating base model...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_base)
-    test_metrics = model.evaluate(test_data, test_labels)
+    test_metrics = model.evaluate(test_gen)
     print('Standalone accuracies are ', test_metrics[-1])
     print('DONE!\n')
 
@@ -182,7 +130,7 @@ def evaluate_models(test_data, test_labels):
     print('Evaluating T-Recx model with EV-assistance...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_ev)
-    test_metrics = model.evaluate(test_data, test_labels)
+    test_metrics = model.evaluate(test_gen)
     print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
     print('DONE!\n')
 
@@ -190,7 +138,7 @@ def evaluate_models(test_data, test_labels):
     print('Evaluating T-Recx model without EV-assistance...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_noev)
-    test_metrics = model.evaluate(test_data, test_labels)
+    test_metrics = model.evaluate(test_gen)
     print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
     print('DONE!\n')
 
@@ -198,7 +146,7 @@ def evaluate_models(test_data, test_labels):
     print('Evaluating base model with baselineEE...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_baseline_ee)
-    test_metrics = model.evaluate(test_data, test_labels)
+    test_metrics = model.evaluate(test_gen)
     print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
     print('DONE!\n')
 
@@ -206,7 +154,7 @@ def evaluate_models(test_data, test_labels):
     print('Evaluating SDN-Resnet...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_sdn)
-    test_metrics = model.evaluate(test_data, test_labels)
+    test_metrics = model.evaluate(test_gen)
     print('Standalone accuracies are ', test_metrics[-3], test_metrics[-2], test_metrics[-1])
     print('DONE!\n')
     
@@ -214,7 +162,7 @@ def evaluate_models(test_data, test_labels):
     print('Evaluating Branchynet-Resnet...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_branchynet)
-    test_metrics = model.evaluate(test_data, test_labels)
+    test_metrics = model.evaluate(test_gen)
     print('Standalone accuracies are ', test_metrics[-3], test_metrics[-2], test_metrics[-1])
     print('DONE!\n\n\n')
 
@@ -223,25 +171,26 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--get_trace', type=bool, default=False, 
         help="""If set to true, get trace data """)
-    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+    os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
 
     cifar_10_dir = 'cifar-10-batches-py'
     train_data, train_filenames, train_labels, test_data, test_filenames, test_labels, label_names = \
         train.load_cifar_data(cifar_10_dir)
 
-    
+    datagen = tf.keras.preprocessing.image.ImageDataGenerator()
+    test_gen = datagen.flow(test_data, test_labels,  batch_size=Config.test_batch_size)#batch test data for faster processing
+
     #evaluate models and report accuracies
-    evaluate_models(test_data, test_labels)
-    
+    evaluate_models(test_gen)
 
     # =========Generate Fig 4a=============================
     # generate trace_data for EV-assist and noEV-assist models
     print('=====================================')
-    print('Generating trace data. This may take several minutes (20-30min) to complete...')
+    print('Generating trace data. This may take several minutes (10-20min) to complete...')
     print('=====================================')
-    helpers.generate_trace(test_data, test_labels, Config.model_name_ev)
-    helpers.generate_trace(test_data, test_labels, Config.model_name_noev)
-    helpers.generate_trace(test_data, test_labels, Config.model_baseline_ee)
+    helpers.generate_trace(test_gen, Config.model_name_ev)
+    helpers.generate_trace(test_gen, Config.model_name_noev)
+    helpers.generate_trace(test_gen, Config.model_baseline_ee)
     print('DONE!')
     #plot the benefit curve
     print('=====================================')
@@ -256,11 +205,11 @@ if __name__ == "__main__":
 
     #=========Generate Fig 7a===========================
     print('\n=============================================================')
-    print('Generating trace data... This may take several minutes (15-20min) to complete...')
+    print('Generating trace data... This may take several minutes (10-15min) to complete...')
     print('===============================================================\n')
-    helpers.generate_trace(test_data, test_labels, Config.model_name_ev)
-    helpers.generate_trace_prior(test_data, test_labels, Config.model_name_sdn)
-    helpers.generate_trace_prior(test_data, test_labels, Config.model_name_branchynet)
+    helpers.generate_trace(test_gen, Config.model_name_ev)
+    helpers.generate_trace_prior(test_gen, Config.model_name_sdn)
+    helpers.generate_trace_prior(test_gen, Config.model_name_branchynet)
     print('DONE!')
     #plot the benefit curve
     print('=====================================')
@@ -271,10 +220,3 @@ if __name__ == "__main__":
     # ====================================================
     
 
-    # #=========Generate Fig 5===========================
-    # print('=====================================')
-    # print('Plotting Violin plot...The image will be saved in results/Fig5.png')
-    # print('=====================================')
-    # plot_violin_plot(Config.model_name_ev, Config.model_baseline_ee)
-    # print('DONE!\n\n')
-    # # ====================================================

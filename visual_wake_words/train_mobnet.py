@@ -48,7 +48,7 @@ def main(argv):
     print('Please provide model_save_name and model_architecture (choose from [mobnet_ev, mobnet_noev])  in cmdl; Usage: python train_mobnet.py <model_save_name> <model_architecture>')
 
   if len(argv)>=4: W_aux = float(argv[3])
-  else: W_aux = 0.3#default is 0.3 from paper
+  else: W_aux = 0.4#default is 0.4 from paper
 
   if len(argv)>=5: 
     if argv[4]=='lossNone': isLossEE = False

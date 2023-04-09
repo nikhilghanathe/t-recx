@@ -7,6 +7,8 @@ val2017.zip
 annotations_trainval2017.zip
 minival/
 annotations/
+results/
+trace_data/
 *.txt
 *.out
 *.jpg

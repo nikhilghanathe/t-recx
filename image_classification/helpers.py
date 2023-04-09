@@ -12,7 +12,7 @@ import numpy as np
 from keras_flops import get_flops
 import tensorflow as tf
 import Config
-
+import sys, os
 
 label_list = ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck','uncertain']
 
@@ -39,7 +39,7 @@ def calc_accuracy(model_name, rho, total_samples):
 		truth = int(pred['truth'])
 		arg_max_1 = int(pred['arg_max_1'])
 		isCorrect = truth==arg_max_1
-		score_max_1, score_max_2 = float(pred['score_max_1']), float(pred['score_max_2'])
+		score_max_1 = float(pred['score_max_1'])
 		if score_max_1>rho:#if score > rho then early-exit
 			if isCorrect:
 				EE_1_correct +=1
@@ -79,56 +79,49 @@ def calculate_scatter_points(model_name, total_samples):
 		y_axis_flops.append(flops_total)
 	return x_axis_accuracy, y_axis_flops
 
-
 #generate trace data and dump into json files for faster access to prediction behavior
-def generate_trace(test_data, test_labels, model_name):
+def generate_trace(val_generator, model_name):
 	if os.path.exists('trace_data/'+'trace_data_'+model_name[15:]+'_ee.json'):
 		print('Trace data already exists for ', model_name)
 		return
-	label_classes = np.argmax(test_labels,axis=1)
+	#load model
 	model = tf.keras.models.load_model(model_name)
-	prediction_dict_ee, prediction_dict_ef = {}, {}
+  #generate predictions and dump into json file
+
+	isBreak = False
 	count = 0
-	for test_sample, label_sample in zip(test_data, test_labels):
-		prediction = model.predict(tf.expand_dims(test_sample, axis=0))
-		prediction_ee, prediction_ef = prediction[0][0], prediction[1][0]
-		y_label = get_ground_truth(count, label_classes)
+	prediction_dict_ee1, prediction_dict_eefinal = {}, {}
+	for val_batch in val_generator:
+	  (test_sample, test_label) = val_batch[0], val_batch[1]
+	  if isBreak:
+	  	break
+	  prediction = model.predict(test_sample, batch_size=Config.test_batch_size)#batch prediction
+	  prediction_ee1, prediction_eefinal = prediction[0], prediction[1]
+	  #collect trace for each pred in batch
+	  for i in range(0, Config.test_batch_size):
+	  	if count==Config.total_samples:#generator loop indefintely, so add manual break when you reach dataset size
+	  		isBreak = True
+	  		break
+	  	truth = np.argmax(test_label[i])
+	  	arg_max_1_ee1, arg_max_1_eefinal  = np.argmax(prediction_ee1[i]), np.argmax(prediction_eefinal[i])
+	  	score_max_1_ee1, score_max_1_eefinal = max(prediction_ee1[i]), max(prediction_eefinal[i])
 
-		#parameters of ee-1
-		prob_list = prediction_ee
-		score_max_1 = sorted(prob_list)[-1]
-		score_max_2 = sorted(prob_list)[-2]
-		arg_max_1 = np.argmax(prob_list)
-		arg_max_2 = np.argsort(prob_list)[-2]
-		if y_label == arg_max_1:
-		    isCorrect = True
-		else:
-		    isCorrect = False
-		prediction_dict_ee.update({str(count): {'truth':str(y_label), 'prediction':str(arg_max_1),  'isCorrect': str(isCorrect), 
-		    'score_max_1' : str(score_max_1),'score_max_2': str(score_max_2), 'arg_max_1' : str(arg_max_1), 'arg_max_2': str(arg_max_2)}})            
+	  	isCorrect = int(truth) == int(arg_max_1_ee1)
+	  	prediction_dict_ee1.update({str(count): {'prediction':str(arg_max_1_ee1), 'truth':str(truth), 'isCorrect': str(isCorrect), 
+	      'score_max_1' : str(score_max_1_ee1), 'arg_max_1' : str(arg_max_1_ee1) }})
+	  	isCorrect = int(truth) == int(arg_max_1_eefinal)
+	  	prediction_dict_eefinal.update({str(count): {'prediction':str(arg_max_1_eefinal), 'truth':str(truth), 'isCorrect': str(isCorrect), 
+			  'score_max_1' : str(score_max_1_eefinal), 'arg_max_1' : str(arg_max_1_eefinal) }})
 
-		prob_list = prediction_ef
-		score_max_1 = sorted(prob_list)[-1]
-		score_max_2 = sorted(prob_list)[-2]
-		arg_max_1 = np.argmax(prob_list)
-		arg_max_2 = np.argsort(prob_list)[-2]
-		if y_label == arg_max_1:
-		    isCorrect = True
-		else:
-		    isCorrect = False
-		prediction_dict_ef.update({str(count): {'truth':str(y_label), 'prediction':str(arg_max_1),  'isCorrect': str(isCorrect), 
-		    'score_max_1' : str(score_max_1),'score_max_2': str(score_max_2), 'arg_max_1' : str(arg_max_1), 'arg_max_2': str(arg_max_2)}})
-
-		count+=1
-
-
+	  	count+=1
+	  	
 	if not os.path.exists('trace_data/'):
 		os.makedirs('trace_data')
 	#dump trace data
 	with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee.json', 'w') as fp:
-		json.dump(prediction_dict_ee, fp, indent=4)
+	 json.dump(prediction_dict_ee1, fp, indent=4)
 	with open('trace_data/'+'trace_data_'+model_name[15:]+'_ef.json', 'w') as fp:
-		json.dump(prediction_dict_ef, fp, indent=4)
+	 json.dump(prediction_dict_eefinal, fp, indent=4)
 
 
 
@@ -158,39 +151,46 @@ def get_flops_prior(model_name):
 	return flops[0], flops[1], flops[2]
 
 # =========collect trace data =================================
-def generate_trace_prior(test_data, test_labels, model_name):
+def generate_trace_prior(val_generator, model_name):
 	if os.path.exists('trace_data/'+'trace_data_'+model_name[15:]+'_ee1.json'):
 		print('Trace data already exists for ', model_name)
 		return
 	model = tf.keras.models.load_model(model_name)
-	label_classes = np.argmax(test_labels,axis=1)
-	#generate predictions and dump into json file
+	isBreak = False
 	count = 0
 	prediction_dict_ee1, prediction_dict_ee2, prediction_dict_ee3, prediction_dict_eefinal = {}, {}, {}, {}
-	for test_sample, test_label in zip(test_data, test_labels):
-		prediction = model.predict(tf.expand_dims(test_sample, axis=0), batch_size=1)
-		prediction_ee1, prediction_ee2,  prediction_eefinal = prediction[0][0], prediction[1][0], prediction[2][0]
-		truth = get_ground_truth(count, label_classes)
-		arg_max_1_ee1, arg_max_1_ee2, arg_max_1_eefinal = np.argmax(prediction_ee1), np.argmax(prediction_ee2), np.argmax(prediction_eefinal)
-		score_max_1_ee1, score_max_1_ee2, score_max_1_eefinal = max(prediction_ee1), max(prediction_ee2), max(prediction_eefinal)
+	for val_batch in val_generator:
+		(test_sample, test_label) = val_batch[0], val_batch[1]
+		if isBreak:
+			break
+		prediction = model.predict(test_sample, batch_size=Config.test_batch_size)#batch prediction
+		prediction_ee1, prediction_ee2,  prediction_eefinal = prediction[0], prediction[1], prediction[2]
+		#collect trace for each pred in batch
+		for i in range(0, Config.test_batch_size):
+			if count==Config.total_samples:#generator loop indefintely, so add manual break when you reach dataset size
+				isBreak = True
+				break
+			truth = np.argmax(test_label[i])
+			arg_max_1_ee1, arg_max_1_ee2, arg_max_1_eefinal = np.argmax(prediction_ee1[i]), np.argmax(prediction_ee2[i]), np.argmax(prediction_eefinal[i])
+			score_max_1_ee1, score_max_1_ee2, score_max_1_eefinal = max(prediction_ee1[i]), max(prediction_ee2[i]), max(prediction_eefinal[i])
 
-		if int(truth) == int(arg_max_1_ee1): isCorrect = True
-		else: isCorrect = False
-		prediction_dict_ee1.update({str(count): {'prediction':str(arg_max_1_ee1), 'truth':str(truth), 'isCorrect': str(isCorrect), 
-		'score_max_1' : str(score_max_1_ee1), 'arg_max_1' : str(arg_max_1_ee1) }})            
+			if int(truth) == int(arg_max_1_ee1): isCorrect = True
+			else: isCorrect = False
+			prediction_dict_ee1.update({str(count): {'prediction':str(arg_max_1_ee1), 'truth':str(truth), 'isCorrect': str(isCorrect), 
+			'score_max_1' : str(score_max_1_ee1), 'arg_max_1' : str(arg_max_1_ee1) }})            
 
-		if int(truth) == int(arg_max_1_ee2): isCorrect = True
-		else: isCorrect = False
-		prediction_dict_ee2.update({str(count): {'prediction':str(arg_max_1_ee2), 'truth':str(truth), 'isCorrect': str(isCorrect), 
-		'score_max_1' : str(score_max_1_ee2), 'arg_max_1' : str(arg_max_1_ee2) }})            
+			if int(truth) == int(arg_max_1_ee2): isCorrect = True
+			else: isCorrect = False
+			prediction_dict_ee2.update({str(count): {'prediction':str(arg_max_1_ee2), 'truth':str(truth), 'isCorrect': str(isCorrect), 
+			'score_max_1' : str(score_max_1_ee2), 'arg_max_1' : str(arg_max_1_ee2) }})            
 
 
-		if int(truth) == int(arg_max_1_eefinal): isCorrect = True
-		else: isCorrect = False
-		prediction_dict_eefinal.update({str(count): {'prediction':str(arg_max_1_eefinal), 'truth':str(truth), 'isCorrect': str(isCorrect), 
-		'score_max_1' : str(score_max_1_eefinal), 'arg_max_1' : str(arg_max_1_eefinal) }})            
+			if int(truth) == int(arg_max_1_eefinal): isCorrect = True
+			else: isCorrect = False
+			prediction_dict_eefinal.update({str(count): {'prediction':str(arg_max_1_eefinal), 'truth':str(truth), 'isCorrect': str(isCorrect), 
+			'score_max_1' : str(score_max_1_eefinal), 'arg_max_1' : str(arg_max_1_eefinal) }})            
 
-		count+=1
+			count+=1
 
 	#dump trace data
 	with open('trace_data/'+'trace_data_'+model_name[15:]+'_ee1.json', 'w') as fp:
@@ -199,7 +199,6 @@ def generate_trace_prior(test_data, test_labels, model_name):
 		json.dump(prediction_dict_ee2, fp, indent=4)
 	with open('trace_data/'+'trace_data_'+model_name[15:]+'_eefinal.json', 'w') as fp:
 		json.dump(prediction_dict_eefinal, fp, indent=4)
-
 
 
 # return points for scatter plot

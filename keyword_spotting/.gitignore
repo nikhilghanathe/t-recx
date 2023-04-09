@@ -1,6 +1,7 @@
 *~
 data/
 results/
+trace_data/
 plots/
 *.dat
 tmp*
@@ -11,4 +12,3 @@ __pycache__/
 Untitled*
 aww_model.tflite
 .ipynb_checkpoints/
-ffmpeg-release-amd64-static.tar.xz

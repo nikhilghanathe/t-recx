@@ -18,3 +18,5 @@ loss_weights_sdn = [0,0,1]
 #hyperparameters
 epochs = 500
 batch_size = 32
+test_batch_size = 100
+total_samples= 10000
