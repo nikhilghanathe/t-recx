@@ -5,10 +5,6 @@ File:train_mobnet.py
 desc: loads data, trains and saves model, 
 Train the mobilenetv1 model with EV-assistance and without assistance
 
-The visual wakewords person detection model is a core model for the TinyMLPerf
-benchmark suite. This script provides source for how the reference model was
-created and trained, and can be used as a starting point for open submissions
-using re-training.
 '''
 
 import os
@@ -48,14 +44,8 @@ def main(argv):
     print('Please provide model_save_name and model_architecture (choose from [mobnet_ev, mobnet_noev])  in cmdl; Usage: python train_mobnet.py <model_save_name> <model_architecture>')
 
   if len(argv)>=4: W_aux = float(argv[3])
-  else: W_aux = 0.4#default is 0.4 from paper
+  else: W_aux = Config.W_aux #default is 0.4 from paper
 
-  if len(argv)>=5: 
-    if argv[4]=='lossNone': isLossEE = False
-    else: isLossEE = True
-
-  print('W_aux= ',W_aux)
-  print('isLossEE= ',isLossEE)
   # load uninitialized model
   if model_architecture=='mobnet_ev':
     model = models.mobilenet_v1_ev(W_aux)
@@ -92,9 +82,9 @@ def main(argv):
   print(train_generator.class_indices)
 
   # train model in 3 iterations
-  model = train_epochs(model, train_generator, val_generator, Config.epochs_0, 0.001, model_save_name, 0, model_architecture, isLossEE)
-  model = train_epochs(model, train_generator, val_generator, Config.epochs_1, 0.0005, model_save_name, 1, model_architecture, isLossEE)
-  model = train_epochs(model, train_generator, val_generator, Config.epochs_2, 0.00025, model_save_name, 2, model_architecture, isLossEE)
+  model = train_epochs(model, train_generator, val_generator, Config.epochs_0, 0.001, model_save_name, 0, model_architecture)
+  model = train_epochs(model, train_generator, val_generator, Config.epochs_1, 0.0005, model_save_name, 1, model_architecture)
+  model = train_epochs(model, train_generator, val_generator, Config.epochs_2, 0.00025, model_save_name, 2, model_architecture)
 
   # Save model
   save_trecx_model(model, model_save_name, model_architecture)
@@ -129,17 +119,12 @@ class weight_transfer_callback(tf.keras.callbacks.Callback):
 
 
 def train_epochs(model, train_generator, val_generator, epoch_count,
-                 learning_rate, model_name, train_count, model_architecture, isLossEE):
-  if isLossEE:
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate),
-        loss='categorical_crossentropy',
-        metrics=['accuracy'], loss_weights=None, run_eagerly=False)
-  else:
-    model.compile(
-        optimizer=tf.keras.optimizers.Adam(learning_rate),
-        loss=[None, 'categorical_crossentropy'],
-        metrics=['accuracy'], loss_weights=None, run_eagerly=False)
+                 learning_rate, model_name, train_count, model_architecture):
+
+  model.compile(
+      optimizer=tf.keras.optimizers.Adam(learning_rate),
+      loss=[None, 'categorical_crossentropy'],
+      metrics=['accuracy'], loss_weights=None, run_eagerly=False)
 
 
   if model_architecture=='mobnet_ev':

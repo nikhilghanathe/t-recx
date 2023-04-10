@@ -61,20 +61,26 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     if not os.path.exists('results'):
         os.makedirs('results')
     os.chdir('results')
-    fig = plt.gcf()
-    fig.set_size_inches((20, 15), forward=False)
-    fig.savefig('Fig4b.png', dpi=1000)
+    plt.savefig('Fig4b.png', dpi=1000)
     os.chdir('..')
     # plt.show()
+
+    # #create data file for tikz graph
+    # with open('benefit_curve_data_KWS_ev.dat', 'w') as fp:
+    #     fp.write('accuracy\tflops\n')
+    #     for i in range(len(x_axis_accuracy_ev)):
+    #         fp.write(str(x_axis_accuracy_ev[i])+'\t'+str(y_axis_flops_ev[i])+'\n')
+    # with open('benefit_curve_data_KWS_no_ev.dat', 'w') as fp:
+    #     fp.write('accuracy\tflops\n')
+    #     for i in range(len(x_axis_accuracy_noev)):
+    #         fp.write(str(x_axis_accuracy_noev[i])+'\t'+str(y_axis_flops_noev[i])+'\n')
 
 
 
 #plot the benefit curve with & without weight transfer, and with ee-fmaps concatenated with final-fmaps (Fig 6 from the paper)
-def plot_benefit_curve_ev_effectiveness(model_name_ev, model_name_noev, model_name_eefmaps_concat, total_samples):
+def plot_benefit_curve_ev_effectiveness(model_name_ev, model_name_eefmaps_concat, total_samples):
     #calc benefit curve with EV-assistance
     x_axis_accuracy_ev, y_axis_flops_ev = helpers.calculate_scatter_points(model_name_ev, total_samples)
-    #calc benefit curve without EV-assistance
-    x_axis_accuracy_noev, y_axis_flops_noev = helpers.calculate_scatter_points(model_name_noev, total_samples)
     #calc benefit curve with EE-fmaps-concat
     x_axis_accuracy_eefmaps_concat, y_axis_flops_eefmaps_concat = helpers.calculate_scatter_points(model_name_eefmaps_concat, total_samples)
     
@@ -85,9 +91,8 @@ def plot_benefit_curve_ev_effectiveness(model_name_ev, model_name_noev, model_na
     plt.vlines(Config.accuracy_noEE, 0,Config.flops_noEE, linestyles='dashed', color='orange')
     plt.hlines(Config.flops_noEE, 0,Config.accuracy_noEE, linestyles='dashed', color='orange')
     plt.scatter(x_axis_accuracy_ev, y_axis_flops_ev, color='blue', label='with weight transfer')
-    plt.scatter(x_axis_accuracy_noev, y_axis_flops_noev, color='purple', label='without weight transfer ')
-    plt.scatter(x_axis_accuracy_eefmaps_concat, y_axis_flops_eefmaps_concat, color='green', label='EE ')
-    plt.title('Flops vs Accuracy tradeoff (Fig6: Benefit curve for DSCNN: Benefit curve for DS-CNN:\n 1) w/ weight transfer\n 2) w/o weight transfer from early to final exit\n3) concatenation of early-exit and final exit feature maps at final exit)')
+    plt.scatter(x_axis_accuracy_eefmaps_concat, y_axis_flops_eefmaps_concat, color='green', label='EE-fmaps concat')
+    plt.title('Flops vs Accuracy tradeoff \n (Fig6: Benefit curve for DSCNN: Benefit curve for DS-CNN:\n 1) w/ weight transfer\n 2) concatenation of early-exit and final exit feature maps at final exit)')
     plt.ylabel('FLOPS (millions)')
     plt.xlabel('Total Accuracy (%)')
     plt.xlim([86,95])
@@ -106,10 +111,14 @@ def plot_benefit_curve_ev_effectiveness(model_name_ev, model_name_noev, model_na
     if not os.path.exists('results'):
         os.makedirs('results')
     os.chdir('results')
-    fig = plt.gcf()
-    fig.set_size_inches((20, 15), forward=False)
-    fig.savefig('Fig6.png', dpi=1000)
+    plt.savefig('Fig6.png', dpi=1000)
     os.chdir('..')
+
+    # #create data file for tikz graph
+    # with open('benefit_curve_data_KWS_msd.dat', 'w') as fp:
+    #     fp.write('accuracy\tflops\n')
+    #     for i in range(len(x_axis_accuracy_eefmaps_concat)):
+    #         fp.write(str(x_axis_accuracy_eefmaps_concat[i])+'\t'+str(y_axis_flops_eefmaps_concat[i])+'\n')
 
 
 # ----------------------------------------------------------------------------------------
@@ -129,7 +138,7 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     plt.scatter(x_axis_accuracy_ev, y_axis_flops_ev, color='blue', label='T-RECX')
     plt.scatter(x_axis_accuracy_sdn, y_axis_flops_sdn, color='black', label='SDN')
     plt.scatter(x_axis_accuracy_branchynet, y_axis_flops_branchynet, color='green', label='BRANCHYNET')
-    plt.title('Flops vs Accuracy tradeoff (Comparison with Prior works) Fig7a')
+    plt.title('Flops vs Accuracy tradeoff (Comparison with Prior works) Fig7b')
     plt.ylabel('FLOPS (millions)')
     plt.xlabel('Total Accuracy (%)')
     plt.xlim([85,95])
@@ -149,9 +158,7 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     if not os.path.exists('results'):
         os.makedirs('results')
     os.chdir('results')
-    fig = plt.gcf()
-    fig.set_size_inches((20, 15), forward=False)
-    fig.savefig('Fig7b.png', dpi=1000)
+    plt.savefig('Fig7b.png', dpi=1000)
     os.chdir('..')
 
 
@@ -236,7 +243,7 @@ if __name__ == "__main__":
     print('=====================================')
     print('Plotting benefit curve to compare EV-assist effectiveness ...The image will be saved in results/Fig6.png')
     print('=====================================')
-    plot_benefit_curve_ev_effectiveness(Config.model_name_ev, Config.model_name_noev, Config.model_name_eefmaps_concat, total_samples=Config.total_samples)
+    plot_benefit_curve_ev_effectiveness(Config.model_name_ev, Config.model_name_eefmaps_concat, total_samples=Config.total_samples)
     print('DONE!\n\n')
     # ====================================================
 

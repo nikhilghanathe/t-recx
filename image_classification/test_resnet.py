@@ -72,9 +72,6 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
 
 
 
-
-
-
 # ----------------------------------------------------------------------------------------
 # --------------Comparison with prior works-----------------------------------------------
 # ----------------------------------------------------------------------------------------
@@ -114,6 +111,7 @@ def plot_benefit_curve_prior(model_name_ev, model_name_sdn, model_name_branchyne
     os.chdir('results')
     plt.savefig('Fig7a.png', dpi=1000)
     os.chdir('..')
+
 
 
 
@@ -218,5 +216,3 @@ if __name__ == "__main__":
     plot_benefit_curve_prior(Config.model_name_ev, Config.model_name_sdn, Config.model_name_branchynet, total_samples=int(test_labels.shape[0]))
     print('DONE!\n\n')
     # ====================================================
-    
-

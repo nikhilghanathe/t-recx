@@ -36,8 +36,8 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     plt.title('Flops vs Accuracy tradeoff (Benefit curve for Resnet) Fig4a')
     plt.ylabel('FLOPS (millions)')
     plt.xlabel('Total Accuracy (%)')
-    plt.xlim([78,87])
-    plt.ylim([5,16])
+    plt.xlim([75,87])
+    plt.ylim([5,20])
 
     #annotate the plot with accuracy and flops of the base model
     label = f"({Config.accuracy_noEE},{Config.flops_noEE})"
@@ -52,11 +52,20 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     if not os.path.exists('results'):
       os.makedirs('results')
     os.chdir('results')
-    fig = plt.gcf()
-    fig.set_size_inches((20, 15), forward=False)
-    fig.savefig('Fig4a.png', dpi=1000)
+    plt.savefig('Fig4a.png', dpi=1000)
     os.chdir('..')
     # plt.show()
+
+    # #create data file for tikz graph
+    # with open('benefit_curve_data_VWW_mv.dat', 'w') as fp:
+    #     fp.write('accuracy\tflops\n')
+    #     for i in range(len(x_axis_accuracy_ev)):
+    #         fp.write(str(x_axis_accuracy_ev[i])+'\t'+str(y_axis_flops_ev[i])+'\n')
+    # with open('benefit_curve_data_VWW_no_mv.dat', 'w') as fp:
+    #     fp.write('accuracy\tflops\n')
+    #     for i in range(len(x_axis_accuracy_noev)):
+    #         fp.write(str(x_axis_accuracy_noev[i])+'\t'+str(y_axis_flops_noev[i])+'\n')
+
 
 
 def evaluate_models(val_generator):
@@ -77,50 +86,9 @@ def evaluate_models(val_generator):
     print('DONE!\n')
 
     print('========================================================')
-    print('Evaluating T-Recx model with EV-assistance_rep...')
-    print('========================================================')
-    model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint+'_rep')
-    test_metrics = model.evaluate(val_generator)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    print('DONE!\n')
-
-    print('========================================================')
     print('Evaluating T-Recx model without EV-assistance...')
     print('========================================================')
     model = tf.keras.models.load_model(Config.model_name_noev)
-    test_metrics = model.evaluate(val_generator)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    print('DONE!\n')
-
-    print('========================================================')
-    print('Evaluating T-Recx model with EV-assistance_point2...')
-    print('========================================================')
-    model = tf.keras.models.load_model(Config.model_name_ev+'_point2')
-    test_metrics = model.evaluate(val_generator)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    print('DONE!\n')
-
-    print('========================================================')
-    print('Evaluating T-Recx model without EV-assistance_point2...')
-    print('========================================================')
-    model = tf.keras.models.load_model(Config.model_name_noev+'_point2')
-    test_metrics = model.evaluate(val_generator)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    print('DONE!\n')
-
-
-    print('========================================================')
-    print('Evaluating T-Recx model with EV-assistance-orig_endpoint...')
-    print('========================================================')
-    model = tf.keras.models.load_model(Config.model_name_ev_orig_endpoint)
-    test_metrics = model.evaluate(val_generator)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    print('DONE!\n')
-
-    print('========================================================')
-    print('Evaluating T-Recx model without EV-assistance-orig_endpoint...')
-    print('========================================================')
-    model = tf.keras.models.load_model(Config.model_name_noev_orig_endpoint)
     test_metrics = model.evaluate(val_generator)
     print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
     print('DONE!\n')
@@ -137,30 +105,13 @@ def main(argv):
 
   print('Done getting data!\n')
 
-
-  model = tf.keras.models.load_model(argv[1])
-  # cnt=0
-  # for layer in model.layers:
-  #   if layer.name=='ee_1_out':
-  #     ee_layer_num = cnt
-  #   if layer.name=='dense_1':
-  #     eefinal_layer_num = cnt
-  #   cnt+=1
-
-  # new_model = tf.keras.Model(inputs=model.inputs, outputs=[model.layers[ee_layer_num].output, model.layers[eefinal_layer_num].output ])
-  # new_model.compile(tf.keras.optimizers.Adam(), metrics='accuracy')
-  # test_metrics = new_model.evaluate(val_generator)
-  test_metrics = model.evaluate(val_generator)
-  print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-  print('DONE!\n')
-  ss
   #evaluate models
   evaluate_models(val_generator)  
 
   #=========Generate Fig 4c=============================
   #generate trace_data for EV-assist and noEV-assist models
   print('=====================================')
-  print('Generating trace data. This may take several minutes (20-30min) to complete...')
+  print('Generating trace data. This may take several minutes (10-15min) to complete...')
   print('=====================================')
   helpers.generate_trace(val_generator, Config.model_name_ev)
   helpers.generate_trace(val_generator, Config.model_name_noev)

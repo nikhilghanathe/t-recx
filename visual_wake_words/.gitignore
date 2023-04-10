@@ -14,3 +14,4 @@ trace_data/
 *.jpg
 *.png
 *.npy
+*.dat

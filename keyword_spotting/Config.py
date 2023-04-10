@@ -4,7 +4,6 @@ BATCH_SIZE=100
 
 
 # model names
-# model_name_ev = 'trained_models/model_with_ev_assist'
 model_name_ev = 'trained_models/model_with_ev_assist'
 model_name_noev = 'trained_models/model_without_ev_assist'
 model_name_eefmaps_concat = 'trained_models/model_eefmaps_concat'
