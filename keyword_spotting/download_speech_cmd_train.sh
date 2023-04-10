@@ -7,7 +7,7 @@ echo "Training T-trecx Model with EV-assistance....."
 echo '======================================================'
 sleep 2
 python train_dscnn.py --data_dir=data/ --model_architecture='ds_cnn_ev' --isTrecx --isEV --model_save_name='model_with_ev_assist'
-export TF_CPP_MIN_LOG_LEVEL=2 
+
 #model without EV-assistance
 echo '======================================================'
 echo "Training T-trecx Model without EV-assistance....."
