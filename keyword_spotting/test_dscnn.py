@@ -211,14 +211,9 @@ if __name__ == "__main__":
     ds_train, ds_test, ds_val = kws_data.get_training_data(Flags)
     print("Done getting data")
     
-    model = tf.keras.models.load_model(Flags.model_init_path)
-    # model.summary()
-    test_metrics = model.evaluate(ds_test)
-    print('Standalone accuracies are ', test_metrics[-2], test_metrics[-1])
-    ss
 
     #evaluate models
-    # evaluate_models(ds_test)
+    evaluate_models(ds_test)
     # =========Generate Fig 4b=============================
     # generate trace_data for EV-assist and noEV-assist models
     print('=====================================')

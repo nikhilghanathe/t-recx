@@ -18,7 +18,7 @@ echo '======================================================'
 echo "Training DSCNN Model with EE-fmaps concatenated with final-fmaps....."
 echo '======================================================'
 sleep 2
-python train_dscnn.py --data_dir=data/ --model_architecture='ds_cnn_eefmaps_concat' --isTrecx --model_save_name='model_eefmaps_concat'
+python train_dscnn.py --data_dir=data/ --model_architecture='ds_cnn_eefmaps_concat' --model_save_name='model_eefmaps_concat'
 
 #DSCNN with SDN techniques
 echo '======================================================'

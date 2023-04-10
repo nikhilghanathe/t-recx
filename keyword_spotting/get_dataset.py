@@ -283,9 +283,9 @@ def get_training_data(Flags, get_waves=False, val_cal_subset=False):
 
 
   if get_waves:
-    ds_train = ds_train.map(cast_and_pad)
+    ds_train =  ds_train.map(cast_and_pad)
     ds_test  =  ds_test.map(cast_and_pad)
-    ds_val   =   ds_val.map(cast_and_pad)
+    ds_val   =  ds_val.map(cast_and_pad)
   else:
     # extract spectral features and add background noise
     ds_train = ds_train.map(get_preprocess_audio_func(model_settings,is_training=True,

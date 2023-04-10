@@ -534,9 +534,7 @@ def get_model(args):
     x = Conv2D(filters, (1,1), padding='same', kernel_regularizer=regularizer)(x)
     x = BatchNormalization()(x)
     x = Activation('relu', name='ee_1_fmaps')(x)
-    #add EE
-    ee1_fmaps = x
-
+    
     # Second layer of separable depthwise conv2d
     x = DepthwiseConv2D(depth_multiplier=1, kernel_size=(3,3), padding='same', kernel_regularizer=regularizer)(x)
     x = BatchNormalization()(x)
@@ -544,6 +542,9 @@ def get_model(args):
     x = Conv2D(filters, (1,1), padding='same', kernel_regularizer=regularizer)(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
+    
+    #add EE
+    ee1_fmaps = x
 
     # Third layer of separable depthwise conv2d
     x = DepthwiseConv2D(depth_multiplier=1, kernel_size=(3,3), padding='same', kernel_regularizer=regularizer)(x)
@@ -589,11 +590,8 @@ def get_model(args):
     y_combined = tf.keras.layers.concatenate([y, y_ee])
     ee_final = Dense(model_settings['label_count'], activation='softmax',name='ef_out')(y_combined)
 
-    #add endpoint layer
-    targets = Input(shape=[1], name='input_2')
-    ee_1 = Endpoint_ee(name='endpoint', W_aux=model_settings['W_aux'], num_classes=model_settings['label_count'])(ee_1, targets)
     # Instantiate model.
-    model = Model(inputs=[inputs, targets], outputs=[ee_1,ee_final])
+    model = Model(inputs=inputs, outputs=[ee_1,ee_final])
   
 
   else:
