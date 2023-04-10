@@ -188,8 +188,6 @@ def parse_command():
         help=""" Specify whether to use EV architecture. To use EV-assistance use this flag in command line (--isEV). Exclude for no EV-assistance """)
   parser.add_argument('--isTrecx', action="store_true", 
         help=""" Specify whether to use custom datagen for T-recx models. HAVE TO USE this: --isTrecx on cmdl for all T-recx models. Exclude to use normal datagen """)
-  parser.add_argument('--isAll_transf', action="store_true", 
-        help=""" Use to do weight transfer from ee to ef for all epcohs""")
 
 
   Flags, unparsed = parser.parse_known_args()

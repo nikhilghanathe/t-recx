@@ -17,13 +17,12 @@ num_classes = 12 # should probably draw this directly from the dataset.
 
 #custom callback to transfer weights from early exit to final exit before each train batch
 class weight_transf_callback(tf.keras.callbacks.Callback):
-  def __init__(self, num_epochs, isAll_transf):
+  def __init__(self, num_epochs):
     self.epoch_threshold_max = (num_epochs//5) *4
     self.no_transfer = False
-    self.isAll_transf = isAll_transf
 
   def on_train_batch_begin(self, batch, logs=None):    
-    if self.isAll_transf:
+    if not self.no_transfer:
       for layer in self.model.layers:
         if layer.name=='depth_conv_ee_1':
           conv_layer = layer
@@ -31,17 +30,7 @@ class weight_transf_callback(tf.keras.callbacks.Callback):
           depthconv_eefinal_layer = layer
       #transfer weights
       weights = conv_layer.get_weights()
-      depthconv_eefinal_layer.set_weights(weights)
-    else:
-      if not self.no_transfer:
-        for layer in self.model.layers:
-          if layer.name=='depth_conv_ee_1':
-            conv_layer = layer
-          if layer.name=='depth_conv_eefinal_out':
-            depthconv_eefinal_layer = layer
-        #transfer weights
-        weights = conv_layer.get_weights()
-        depthconv_eefinal_layer.set_weights(weights)   
+      depthconv_eefinal_layer.set_weights(weights)   
 
     
 

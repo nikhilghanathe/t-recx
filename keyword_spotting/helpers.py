@@ -1,6 +1,6 @@
 '''
 Project: t-recx
-Subproject: Image classification on cifar10
+Subproject: Keyword spotting on Speech commands
 File:helpers.py 
 desc: helper functions to plot benefit curve, generate trace data and to report standalone accuracies
 

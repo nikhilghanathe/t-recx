@@ -10,7 +10,7 @@ Dataset: Speech Commands
 
 ## Usage
 
-Run the following commands to download dataset and reproduce results from the paper. This command will download the preprocess the dataset and store it to `data/`. Downloading + preprocessing will require 15-20min. Testing using pretrained models will require 10-15 min.
+Run the following commands to download dataset and reproduce results from the paper. This command will download the preprocess the dataset and store it to `data/`. Downloading + preprocessing will require 20-30min. Testing using pretrained models will require 10-15 min.
 ``` Bash
 # Download dataset and test
 python test_dscnn.py --data_dir=data/
