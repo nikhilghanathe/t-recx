@@ -33,7 +33,7 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     plt.hlines(Config.flops_noEE, 0,Config.accuracy_noEE, linestyles='dashed', color='orange')
     plt.scatter(x_axis_accuracy_ev, y_axis_flops_ev, color='blue', label='w/ weight transfer')
     plt.scatter(x_axis_accuracy_noev, y_axis_flops_noev, color='purple', label='w/o weight transfer ')
-    plt.title('Flops vs Accuracy tradeoff (Benefit curve for Resnet) Fig4a')
+    plt.title('Flops vs Accuracy tradeoff (Benefit curve for Resnet) Fig4c')
     plt.ylabel('FLOPS (millions)')
     plt.xlabel('Total Accuracy (%)')
     plt.xlim([75,87])
@@ -52,7 +52,7 @@ def plot_benefit_curve(model_name_ev, model_name_noev, total_samples):
     if not os.path.exists('results'):
       os.makedirs('results')
     os.chdir('results')
-    plt.savefig('Fig4a.png', dpi=1000)
+    plt.savefig('Fig4c.png', dpi=1000)
     os.chdir('..')
     # plt.show()
 
