@@ -5,13 +5,12 @@ Deploying Machine learning (ML) on the milliwatt-scale edge devices (tinyML) is 
 This repository contains code to reproduce results from "T-RECX: Tiny-Resource Efficient Convolutional neural networks with early-eXit" paper
 
 ```
-@misc{ghanathe2022trecx,
-      title={T-RECX: Tiny-Resource Efficient Convolutional Neural Networks with Early-Exit}, 
-      author={Nikhil P Ghanathe and Steve Wilton},
-      year={2022},
-      eprint={2207.06613},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@inproceedings{ghanathe2023trecx,
+  title={T-recx: Tiny-resource efficient convolutional neural networks with early-exit},
+  author={Ghanathe, Nikhil P and Wilton, Steve},
+  booktitle={Proceedings of the 20th ACM International Conference on Computing Frontiers},
+  pages={123--133},
+  year={2023}
 }
 ```
 
